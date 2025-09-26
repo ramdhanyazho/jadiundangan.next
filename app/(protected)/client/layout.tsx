@@ -1,7 +1,7 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import type { ReactNode } from 'react';
-import NavClient from '@/components/NavClient';
+import ClientNav from '@/components/ClientNav';
 import { getServerClient } from '@/lib/supabaseServer';
 
 interface ClientLayoutProps {
@@ -21,7 +21,7 @@ export default async function ClientLayout({ children }: ClientLayoutProps) {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <NavClient />
+      <ClientNav />
       <main className="px-6 py-10 max-w-6xl mx-auto">{children}</main>
     </div>
   );
