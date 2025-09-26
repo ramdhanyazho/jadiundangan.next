@@ -1,0 +1,1 @@
+import AdminNav from '@/components/AdminNav';export default function AdminLayout({ children }){return(<div><AdminNav/><div className='container-narrow py-8'>{children}</div></div>) }

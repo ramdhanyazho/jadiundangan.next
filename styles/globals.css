@@ -1,0 +1,19 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root { --bg-hero: 255,255,255; --text-hero: 14,53,107; }
+[data-theme="jawabiru"] { --bg-hero: 240,245,255; --text-hero: 14,53,107; }
+[data-theme="minimal"] { --bg-hero: 255,255,255; --text-hero: 17,24,39; }
+[data-theme="forest"] { --bg-hero: 240,255,248; --text-hero: 3,84,63; }
+
+.container-narrow{ @apply max-w-3xl mx-auto px-4; }
+.section{ @apply py-12 md:py-16; }
+.card{ @apply rounded-2xl shadow-lg p-6 bg-white/80 backdrop-blur; }
+
+.jawabiru-batik{
+  background-image: url('/patterns/batik-jawabiru.svg');
+  background-size: 300px;
+  background-repeat: repeat;
+  mix-blend-mode: multiply;
+}
