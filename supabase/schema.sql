@@ -1,3 +1,5 @@
+create extension if not exists pgcrypto;
+
 -- Core tables
 create table if not exists invitations (
   id uuid primary key default gen_random_uuid(),
@@ -86,6 +88,7 @@ create table if not exists profiles (
   user_id uuid unique not null,
   email text,
   full_name text,
+  password_hash text,
   is_admin boolean default false,
   created_at timestamptz default now()
 );
@@ -203,3 +206,18 @@ from invitations where slug='contoh-rahmat-nisa' on conflict do nothing;
 insert into stories (invitation_id, title, body, date, date_display, photo_url, sort_index)
 select id, 'Lamaran', 'Momen hangat bersama keluarga sebagai langkah keseriusan.', '2025-05-12', '12 Mei 2025', null, 2
 from invitations where slug='contoh-rahmat-nisa' on conflict do nothing;
+
+-- Seed admin profile
+insert into profiles (user_id, email, full_name, password_hash, is_admin)
+values (
+  '00000000-0000-0000-0000-000000000001',
+  'admin@example.com',
+  'Admin Supabase',
+  crypt(' P@ssw0rd!', gen_salt('bf')),
+  true
+)
+on conflict (user_id) do update set
+  email = excluded.email,
+  full_name = excluded.full_name,
+  password_hash = excluded.password_hash,
+  is_admin = true;
