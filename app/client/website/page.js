@@ -5,6 +5,7 @@ import UploadImage from '@/components/UploadImage';
 export default function WebsiteSettings(){
   const [invitation, setInvitation] = useState(null);
   const [themes] = useState([{ slug:'jawabiru', name:'Jawa Biru' },{ slug:'minimal', name:'Minimal' },{ slug:'forest', name:'Forest' }]);
+  const suffixPreview = invitation?.custom_domain_suffix?.trim() || 'suffix';
   useEffect(()=>{(async ()=>{const { data } = await supabase.from('invitations').select('*').eq('slug','contoh-rahmat-nisa').single(); setInvitation(data);})();},[]);
   const save = async () => {
     if (!invitation) return;
@@ -36,7 +37,7 @@ export default function WebsiteSettings(){
           <div>
             <label className="block text-sm mb-1">Domain Belakang (suffix)</label>
             <input className="w-full border rounded-lg px-3 py-2" placeholder="contoh: rahmat-nisa" value={invitation?.custom_domain_suffix || ''} onChange={e=>setInvitation({...invitation, custom_domain_suffix: e.target.value})} />
-            <div className="text-xs opacity-70 mt-1">Hasil: https://domainmu.com/{{suffix}}</div>
+            <div className="text-xs opacity-70 mt-1">Hasil: https://domainmu.com/{suffixPreview}</div>
           </div>
           <div className="md:col-span-2">
             <label className="block text-sm mb-1">URL Musik</label>
