@@ -1,1 +1,0 @@
-import ClientNav from '@/components/ClientNav';export default function ClientLayout({ children }){return(<div><ClientNav/><div className='container-narrow py-8'>{children}</div></div>) }
