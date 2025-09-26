@@ -5,6 +5,13 @@
 2) Jalankan: `npm install` lalu `npm run dev`.
 3) Di Supabase, buka **SQL Editor** dan jalankan `supabase/schema.sql` (buat bucket Storage `media` public).
 
+### Kredensial Admin Supabase
+- Password **tidak** disimpan di tabel `profiles`. Supabase Auth menyimpan hash password secara terpisah di sistem autentikasinya.
+- Untuk membuat/ubah password admin, buka **Authentication → Users** di dashboard Supabase, pilih user yang diinginkan, lalu atur password atau kirim tautan reset.
+- Pastikan entri pada tabel `profiles` memiliki `is_admin = true` (atau `role = 'admin'` jika kolom tersebut ada) supaya pengguna diarahkan ke `/admin` setelah login.
+- Berkas `supabase/schema.sql` juga menambahkan profil admin contoh dengan email `admin@example.com` dan password `P@ssw0rd!` untuk kebutuhan testing lokal.
+
+
 ## Fitur
 - Undangan by slug `/undangan/[slug]` (SSR).
 - Hero + Overlay "Buka Undangan" (scroll lock + autoplay musik).
