@@ -74,9 +74,10 @@ export default function LoginPage() {
     const supabase = getBrowserClient();
 
     const email = formState.email.trim();
-    const password = formState.password.trim();
+    const password = formState.password;
+    const isPasswordEmpty = password.trim().length === 0;
 
-    if (!email || !password) {
+    if (!email || isPasswordEmpty) {
       setError('Email dan password wajib diisi.');
       setIsLoading(false);
       return;
