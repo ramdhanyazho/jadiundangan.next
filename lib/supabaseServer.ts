@@ -21,11 +21,15 @@ const getSupabaseEnv = () => {
 export const getServerClient = (cookieStore: CookieStore) => {
   const { supabaseKey, supabaseUrl } = getSupabaseEnv();
 
-  return createServerComponentClient<Database>({
-    cookies: () => cookieStore,
-    supabaseUrl,
-    supabaseKey,
-  });
+  return createServerComponentClient<Database>(
+    {
+      cookies: () => cookieStore,
+    },
+    {
+      supabaseUrl,
+      supabaseKey,
+    }
+  );
 };
 
 export type { CookieStore };
