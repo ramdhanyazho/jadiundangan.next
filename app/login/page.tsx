@@ -39,7 +39,15 @@ export default function LoginPage() {
       });
 
       if (signInError || !user) {
-        throw signInError ?? new Error('Gagal masuk.');
+        const normalizedMessage = signInError?.message.toLowerCase();
+        const friendlyMessage =
+          normalizedMessage && normalizedMessage.includes('invalid login credentials')
+            ? 'Email atau password salah.'
+            : signInError?.status === 400
+              ? 'Permintaan login tidak valid. Periksa kembali email dan password Anda.'
+              : signInError?.message;
+
+        throw friendlyMessage ? new Error(friendlyMessage) : signInError ?? new Error('Gagal masuk.');
       }
 
       const { data: rawProfile, error: profileError } = await supabase
