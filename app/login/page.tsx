@@ -29,13 +29,23 @@ export default function LoginPage() {
 
     const supabase = getBrowserClient();
 
+    const email = formState.email.trim();
+    const password = formState.password.trim();
+
+    if (!email || !password) {
+      setError('Email dan password wajib diisi.');
+      setIsLoading(false);
+      return;
+    }
+
+
     try {
       const {
         data: { user },
         error: signInError,
       } = await supabase.auth.signInWithPassword({
-        email: formState.email,
-        password: formState.password,
+        email,
+        password,
       });
 
       if (signInError || !user) {
