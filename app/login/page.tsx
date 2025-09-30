@@ -53,6 +53,8 @@ export default function LoginPage() {
         const friendlyMessage =
           normalizedMessage && normalizedMessage.includes('invalid login credentials')
             ? 'Email atau password salah.'
+            : normalizedMessage && normalizedMessage.includes('no api key found')
+              ? 'Konfigurasi Supabase tidak ditemukan. Silakan hubungi administrator.'
             : signInError?.status === 400
               ? 'Permintaan login tidak valid. Periksa kembali email dan password Anda.'
               : signInError?.message;
