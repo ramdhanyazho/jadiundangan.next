@@ -22,6 +22,49 @@ export default function LoginPage() {
     setFormState((prev) => ({ ...prev, [id]: value }));
   };
 
+  const buildFriendlyMessage = (supabaseError: AuthError | null) => {
+    if (!supabaseError) {
+      return undefined;
+    }
+
+    const normalizedMessage = supabaseError.message
+      ? supabaseError.message.trim().toLowerCase()
+      : '';
+
+    if (
+      normalizedMessage.includes('invalid login credentials') ||
+      normalizedMessage.includes('invalid email or password') ||
+      normalizedMessage.includes('invalid_grant')
+    ) {
+      return 'Email atau password salah.';
+    }
+
+    if (
+      normalizedMessage.includes('email not confirmed') ||
+      normalizedMessage.includes('email_not_confirmed')
+    ) {
+      return 'Email belum terverifikasi. Silakan periksa email Anda untuk melakukan verifikasi.';
+    }
+
+    if (normalizedMessage.includes('over email rate limit')) {
+      return 'Terlalu banyak percobaan login. Silakan coba lagi beberapa saat lagi.';
+    }
+
+    if (normalizedMessage.includes('no api key found')) {
+      return 'Konfigurasi Supabase tidak ditemukan. Silakan hubungi administrator.';
+    }
+
+    if (supabaseError.status === 400) {
+      return 'Permintaan login tidak valid. Periksa kembali email dan password Anda.';
+    }
+
+    if (supabaseError.status >= 500) {
+      return 'Layanan login sedang bermasalah. Silakan coba lagi beberapa saat lagi.';
+    }
+
+    return undefined;
+  };
+
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsLoading(true);
@@ -49,15 +92,7 @@ export default function LoginPage() {
       });
 
       if (signInError || !user) {
-        const normalizedMessage = signInError?.message.toLowerCase();
-        const friendlyMessage =
-          normalizedMessage && normalizedMessage.includes('invalid login credentials')
-            ? 'Email atau password salah.'
-            : normalizedMessage && normalizedMessage.includes('no api key found')
-              ? 'Konfigurasi Supabase tidak ditemukan. Silakan hubungi administrator.'
-            : signInError?.status === 400
-              ? 'Permintaan login tidak valid. Periksa kembali email dan password Anda.'
-              : signInError?.message;
+        const friendlyMessage = buildFriendlyMessage(signInError ?? null) ?? signInError?.message;
 
         throw friendlyMessage ? new Error(friendlyMessage) : signInError ?? new Error('Gagal masuk.');
       }
