@@ -116,8 +116,15 @@ export default function LoginPage() {
       router.replace(destination);
       router.refresh();
     } catch (submitError) {
-      const message =
-        submitError instanceof Error ? submitError.message : 'Terjadi kesalahan saat masuk.';
+      const message = (() => {
+        if (submitError instanceof TypeError && submitError.message === 'Failed to fetch') {
+          return 'Tidak dapat terhubung ke layanan login. Periksa koneksi internet Anda atau konfigurasi Supabase.';
+        }
+
+        return submitError instanceof Error
+          ? submitError.message
+          : 'Terjadi kesalahan saat masuk.';
+      })();
       setError(message);
     } finally {
       setIsLoading(false);
