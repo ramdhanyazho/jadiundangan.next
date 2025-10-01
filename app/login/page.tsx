@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState, type ChangeEvent, type FormEvent } from 'react';
 import { type AuthError } from '@supabase/supabase-js';
-import { getBrowserClient } from '@/lib/supabaseClient';
+import { supabaseBrowser } from '@/lib/supabase/client-browser';
 
 const loginFields = [
   { id: 'email', label: 'Email', type: 'email', autoComplete: 'email' },
@@ -71,7 +71,7 @@ export default function LoginPage() {
     setIsLoading(true);
     setError(null);
 
-    const supabase = getBrowserClient();
+    const supabase = supabaseBrowser();
 
     const email = formState.email.trim();
     const password = formState.password;
@@ -111,7 +111,7 @@ export default function LoginPage() {
 
       const profile = rawProfile as { is_admin?: boolean | null; role?: string | null } | null;
       const isAdmin = profile?.is_admin === true || profile?.role === 'admin';
-      const destination = isAdmin ? '/admin' : '/client';
+      const destination = isAdmin ? '/admin' : '/dashboard';
 
       router.replace(destination);
       router.refresh();

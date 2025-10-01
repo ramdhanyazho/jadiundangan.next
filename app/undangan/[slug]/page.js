@@ -1,5 +1,4 @@
-import { cookies } from 'next/headers';
-import { getServerClient } from '@/lib/supabaseServer';
+import { supabaseServer } from '@/lib/supabase/client-server';
 import InviteOverlay from '@/components/InviteOverlay';
 import Hero from '@/components/Hero';
 import EventSection from '@/components/EventSection';
@@ -16,7 +15,7 @@ export const revalidate = 0;
 
 export default async function Undangan({ params }){
   const { slug } = params;
-  const supabase = getServerClient(cookies());
+  const supabase = supabaseServer();
   const { data: invitation, error } = await supabase.from('invitations').select('*').eq('slug', slug).eq('is_published', true).single();
   if (error || !invitation) return notFound();
   const [{ data: events }, { data: photos }, { data: gifts }, { data: stories }, { data: rsvps }] = await Promise.all([

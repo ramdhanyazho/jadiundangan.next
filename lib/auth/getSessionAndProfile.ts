@@ -1,7 +1,6 @@
-import { cookies } from 'next/headers';
 import type { Session } from '@supabase/supabase-js';
 
-import { getServerClient } from '@/lib/supabaseServer';
+import { supabaseServer } from '@/lib/supabase/client-server';
 import type { Database, Profile } from '@/types/db';
 
 interface SessionAndProfile {
@@ -10,8 +9,7 @@ interface SessionAndProfile {
 }
 
 export async function getSessionAndProfile(): Promise<SessionAndProfile> {
-  const cookieStore = cookies();
-  const supabase = getServerClient(cookieStore);
+  const supabase = supabaseServer();
 
   const {
     data: { session },
