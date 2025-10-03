@@ -1,6 +1,7 @@
 import crypto from 'crypto';
 
 import { getAdminClient } from '@/lib/supabaseAdmin';
+import type { ProfileInsert } from '@/types/db';
 
 function safeEq(a?: string | null, b?: string | null) {
   const aBuffer = Buffer.from(a ?? '');
@@ -47,17 +48,26 @@ export async function POST(req: Request) {
 
     const user = data.user;
 
-    const { error: upsertError } = await admin
-      .from('profiles')
-      .upsert(
-        {
-          user_id: user.id,
-          email,
-          is_admin: isAdmin,
-          role: isAdmin ? 'admin' : 'client',
-        },
-        { onConflict: 'user_id' }
-      );
+    const profilePayload: ProfileInsert = {
+      user_id: user.id,
+      email,
+      is_admin: isAdmin,
+      role: isAdmin ? 'admin' : 'client',
+    };
+
+    // The Supabase client type generated for the admin instance currently resolves the
+    // `upsert` payload type to `never`. Cast the table interface temporarily so we can
+    // keep runtime behaviour while still validating the payload shape via `ProfileInsert`.
+    const profilesTable = admin.from('profiles') as unknown as {
+      upsert: (
+        values: ProfileInsert,
+        options: { onConflict?: string }
+      ) => Promise<{ data: null; error: { message: string } | null }>;
+    };
+
+    const { error: upsertError } = await profilesTable.upsert(profilePayload, {
+      onConflict: 'user_id',
+    });
 
     if (upsertError) {
       return new Response(upsertError.message, { status: 400 });

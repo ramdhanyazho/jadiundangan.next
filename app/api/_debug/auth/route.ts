@@ -9,9 +9,22 @@ export async function GET() {
     const hasAnonFallback = Boolean(process.env.SUPABASE_ANON_KEY);
 
     const admin = getAdminClient();
-    const { data: settings, error } = await admin.auth.admin.getAuthSettings();
+    // `getAuthSettings` exists in the GoTrue Admin API but is currently missing from the
+    // TypeScript definition shipped with `@supabase/supabase-js`, so we narrow the shape
+    // manually and fall back gracefully if the method is unavailable at runtime.
+    const adminAuth = admin.auth.admin as {
+      getAuthSettings?: () => Promise<{
+        data: { email_password?: { enabled?: boolean | null } } | null;
+        error: { message: string } | null;
+      }>;
+    };
 
-    const emailProviderEnabled = !error && Boolean(settings?.email_password?.enabled);
+    const settingsResponse = adminAuth.getAuthSettings
+      ? await adminAuth.getAuthSettings()
+      : { data: null, error: null };
+
+    const emailProviderEnabled =
+      !settingsResponse.error && Boolean(settingsResponse.data?.email_password?.enabled);
 
     return Response.json({
       hasUrl,

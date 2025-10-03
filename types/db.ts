@@ -103,7 +103,7 @@ export interface PaymentUpdate {
   status?: string | null;
 }
 
-export interface Database {
+export type Database = {
   public: {
     Tables: {
       profiles: {
@@ -142,6 +142,6 @@ export interface Database {
     Enums: Record<string, never>;
     CompositeTypes: Record<string, never>;
   };
-}
+};
 
 export type Profile = Database['public']['Tables']['profiles']['Row'];
