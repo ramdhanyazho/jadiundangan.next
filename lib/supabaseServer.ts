@@ -1,9 +1,10 @@
 import { cookies } from 'next/headers';
-import { createServerClient, type SupabaseClient } from '@supabase/auth-helpers-nextjs';
+import { createServerClient } from '@supabase/ssr';
+import type { SupabaseClient } from '@supabase/supabase-js';
 
 import type { Database } from '@/types/db';
 
-export function getSupabaseServerClient(): SupabaseClient<Database> {
+export function getServerClient(): SupabaseClient<Database> {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 

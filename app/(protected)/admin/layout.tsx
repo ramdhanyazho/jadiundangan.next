@@ -11,11 +11,11 @@ type Props = { children: ReactNode };
 
 export default async function AdminLayout({ children }: Props) {
   const supabase = getServerClient();
-
+  const {
     data: { user },
   } = await supabase.auth.getUser();
 
-   if (!user) {
+  if (!user) {
     redirect('/login');
   }
 
