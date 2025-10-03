@@ -19,10 +19,11 @@ export default async function AdminLayout({ children }: Props) {
     .from('profiles')
     .select('is_admin')
     .eq('user_id', user.id)
-    .maybeSingle();
+    .maybeSingle<{ is_admin: boolean | null }>();
 
   // Kalau query error, anggap bukan admin
-  if (error || !profile?.is_admin) redirect('/client');
+  const isAdmin = profile?.is_admin ?? false;
+  if (error || !isAdmin) redirect('/client');
 
   return (
     <div className="min-h-screen bg-slate-50">
