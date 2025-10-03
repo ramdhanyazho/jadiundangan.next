@@ -1,4 +1,3 @@
-/* eslint-disable */
 export const dynamic = 'force-dynamic';
 
 async function getJSON(path: string) {
@@ -12,7 +11,6 @@ export default async function AuthDoctor() {
   return (
     <main className="min-h-screen p-6">
       <h1 className="text-2xl font-bold mb-4">Auth Doctor</h1>
-      <p className="text-sm opacity-75 mb-3">Gunakan halaman ini untuk memeriksa konfigurasi Supabase Auth.</p>
       <pre className="p-4 bg-gray-100 rounded-xl text-sm overflow-auto">{JSON.stringify(debug, null, 2)}</pre>
       <div className="mt-4 text-sm">
         <p className="mb-2 font-semibold">Probe Login (via curl):</p>
