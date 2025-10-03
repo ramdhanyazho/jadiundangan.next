@@ -1,6 +1,6 @@
 import type { Session } from '@supabase/supabase-js';
 
-import { getSupabaseServerClient } from '@/lib/supabaseServer';
+import { getServerClient } from '@/lib/supabaseServer';
 import type { Database, Profile } from '@/types/db';
 
 interface SessionAndProfile {
@@ -9,7 +9,7 @@ interface SessionAndProfile {
 }
 
 export async function getSessionAndProfile(): Promise<SessionAndProfile> {
-  const supabase = getSupabaseServerClient();
+  const supabase = getServerClient();
 
   const {
     data: { session },

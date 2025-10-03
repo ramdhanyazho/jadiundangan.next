@@ -2,29 +2,31 @@ import type { ReactNode } from 'react';
 import { redirect } from 'next/navigation';
 
 import NavAdmin from '@/components/NavAdmin';
-import { getSupabaseServerClient } from '@/lib/supabaseServer';
+import { getServerClient } from '@/lib/supabaseServer';
+import type { Database } from '@/types/db';
 
-interface AdminLayoutProps {
-  children: ReactNode;
-}
+type AdminProfile = Pick<Database['public']['Tables']['profiles']['Row'], 'is_admin' | 'role'>;
 
-export default async function AdminLayout({ children }: AdminLayoutProps) {
-  const supabase = getSupabaseServerClient();
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
+type Props = { children: ReactNode };
 
-  if (!session) {
+export default async function AdminLayout({ children }: Props) {
+  const supabase = getServerClient();
+
+    data: { user },
+  } = await supabase.auth.getUser();
+
+   if (!user) {
     redirect('/login');
   }
 
-  const { data: profile } = await supabase
+  const { data: profileData } = await supabase
     .from('profiles')
     .select('is_admin, role')
-    .eq('user_id', session.user.id)
-    .maybeSingle();
+    .eq('user_id', user.id)
+    .maybeSingle<AdminProfile>();
 
-  const isAdmin = profile?.is_admin === true || profile?.role === 'admin';
+  const profile = profileData ?? null;
+  const isAdmin = Boolean(profile && (profile.is_admin === true || profile.role === 'admin'));
 
   if (!isAdmin) {
     redirect('/client');

@@ -1,9 +1,10 @@
 import { redirect } from 'next/navigation';
 
-import { getSupabaseServerClient } from '@/lib/supabaseServer';
+import { getServerClient } from '@/lib/supabaseServer';
+import type { Database } from '@/types/db';
 
 export default async function ClientDashboardPage() {
-  const supabase = getSupabaseServerClient();
+  const supabase = getServerClient();
   const {
     data: { session },
   } = await supabase.auth.getSession();
@@ -22,12 +23,19 @@ export default async function ClientDashboardPage() {
   let totalMessagesDisplay = '—';
 
   if (!invitationsError && Array.isArray(invitations)) {
-    activeInvitationsDisplay = invitations.length.toString();
+    type InvitationSummary = Pick<
+      Database['public']['Tables']['invitations']['Row'],
+      'id' | 'view_count'
+    >;
 
-    const totalVisits = invitations.reduce((sum, invitation) => sum + (invitation.view_count ?? 0), 0);
+    const invitationList = invitations as InvitationSummary[];
+
+    activeInvitationsDisplay = invitationList.length.toString();
+
+    const totalVisits = invitationList.reduce((sum, invitation) => sum + (invitation.view_count ?? 0), 0);
     totalVisitsDisplay = totalVisits.toString();
 
-    const invitationIds = invitations.map((invitation) => invitation.id).filter(Boolean);
+    const invitationIds = invitationList.map((invitation) => invitation.id).filter(Boolean);
 
     if (invitationIds.length === 0) {
       totalMessagesDisplay = '0';

@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState, type ChangeEvent, type FormEvent } from 'react';
-import { getSupabaseBrowserClient } from '@/lib/supabaseClient';
+import { getBrowserClient } from '@/lib/supabaseClient';
 
 const loginFields = [
   { id: 'email', label: 'Email', type: 'email', autoComplete: 'email' },
@@ -11,6 +11,7 @@ const loginFields = [
 ] as const;
 
 export default function LoginPage() {
+  const supabase = getBrowserClient();
   const router = useRouter();
   const [formState, setFormState] = useState({ email: '', password: '' });
   const [showPassword, setShowPassword] = useState(false);
@@ -26,8 +27,6 @@ export default function LoginPage() {
     event.preventDefault();
     setIsLoading(true);
     setError(null);
-
-    const supabase = getSupabaseBrowserClient();
 
     const email = formState.email.trim();
     const password = formState.password;
@@ -50,7 +49,7 @@ export default function LoginPage() {
       });
 
       if (signInError || !user) {
-        throw signInError ?? new Error('Gagal masuk.');
+        throw signInError ?? new Error('Login gagal');
       }
 
       const { data: rawProfile, error: profileError } = await supabase
@@ -70,20 +69,10 @@ export default function LoginPage() {
       router.replace(destination);
       router.refresh();
     } catch (submitError) {
-      let message = 'Terjadi kesalahan saat masuk.';
-
-      if (submitError instanceof TypeError && submitError.message) {
-        message = submitError.message;
-      } else if (submitError instanceof Error && submitError.message) {
-        message = submitError.message;
-      } else if (
-        submitError &&
-        typeof submitError === 'object' &&
-        'message' in submitError &&
-        typeof (submitError as { message?: unknown }).message === 'string'
-      ) {
-        message = (submitError as { message: string }).message;
-      }
+      const message =
+        submitError instanceof Error && submitError.message
+          ? submitError.message
+          : 'Terjadi kesalahan saat masuk.';
 
       setError(message);
     } finally {

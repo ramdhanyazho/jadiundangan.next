@@ -39,6 +39,7 @@ export async function POST(request: Request) {
   }
 
   const supabase = getSupabaseAdminClient();
+  const profilesTable = 'profiles' as const;
 
   const { data: createdUser, error: createError } = await supabase.auth.admin.createUser({
     email,
@@ -55,7 +56,7 @@ export async function POST(request: Request) {
 
   const userId = createdUser.user.id;
 
-  type ProfileInsert = Database['public']['Tables']['profiles']['Insert'] & { role?: string };
+  type ProfileInsert = Database['public']['Tables']['profiles']['Insert'];
   const profilePayload: ProfileInsert = {
     user_id: userId,
     email,
@@ -64,7 +65,8 @@ export async function POST(request: Request) {
 
   let includeRoleColumn = false;
 
-  const { error: roleProbeError } = await supabase.from('profiles').select('role').limit(1);
+  const profilesQuery = supabase.from(profilesTable);
+  const { error: roleProbeError } = await profilesQuery.select('role').limit(1);
 
   if (!roleProbeError || roleProbeError.code === 'PGRST116') {
     includeRoleColumn = true;
@@ -76,9 +78,9 @@ export async function POST(request: Request) {
     profilePayload.role = 'admin';
   }
 
-  const { error: profileError } = await supabase
-    .from('profiles')
-    .upsert(profilePayload, { onConflict: 'user_id' });
+  const { error: profileError } = await (profilesQuery as any).upsert(profilePayload, {
+    onConflict: 'user_id',
+  });
 
   if (profileError) {
     return NextResponse.json(

@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
+import { getServerClient } from '@/lib/supabaseServer';
 
 export async function POST(request){
   try {
@@ -16,7 +15,7 @@ export async function POST(request){
       return new NextResponse('Missing invitation_id or name', { status: 400 });
     }
 
-    const supabase = createRouteHandlerClient({ cookies });
+    const supabase = getServerClient();
     const { error } = await supabase.from('guests').insert(payload);
 
     if (error) {

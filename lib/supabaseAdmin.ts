@@ -2,9 +2,9 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
 import type { Database } from '@/types/db';
 
-let adminClient: SupabaseClient<Database> | undefined;
+let adminClient: SupabaseClient<Database, 'public'> | undefined;
 
-export function getSupabaseAdminClient(): SupabaseClient<Database> {
+export function getSupabaseAdminClient(): SupabaseClient<Database, 'public'> {
   if (adminClient) {
     return adminClient;
   }
@@ -16,7 +16,7 @@ export function getSupabaseAdminClient(): SupabaseClient<Database> {
     throw new Error('Supabase admin client tidak dapat dibuat tanpa konfigurasi lengkap.');
   }
 
-  adminClient = createClient<Database>(supabaseUrl, serviceRoleKey, {
+  adminClient = createClient<Database, 'public'>(supabaseUrl, serviceRoleKey, {
     auth: {
       persistSession: false,
       autoRefreshToken: false,

@@ -1,12 +1,13 @@
-import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+import { createBrowserClient } from '@supabase/ssr';
+import type { SupabaseClient } from '@supabase/supabase-js';
 
 import type { Database } from '@/types/db';
 
-let client: SupabaseClient<Database> | undefined;
+let browserClient: SupabaseClient<Database> | null = null;
 
-export function getSupabaseBrowserClient(): SupabaseClient<Database> {
-  if (client) {
-    return client;
+export function getBrowserClient(): SupabaseClient<Database> {
+  if (browserClient) {
+    return browserClient;
   }
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -16,13 +17,7 @@ export function getSupabaseBrowserClient(): SupabaseClient<Database> {
     throw new Error('Konfigurasi Supabase tidak ditemukan di lingkungan browser.');
   }
 
-  client = createClient<Database>(supabaseUrl, supabaseAnonKey, {
-    auth: {
-      persistSession: true,
-      autoRefreshToken: true,
-      detectSessionInUrl: true,
-    },
-  });
+  browserClient = createBrowserClient<Database>(supabaseUrl, supabaseAnonKey);
 
-  return client;
+  return browserClient;
 }

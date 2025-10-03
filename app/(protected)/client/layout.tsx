@@ -3,19 +3,17 @@ import { redirect } from 'next/navigation';
 
 import LogoutButton from '@/components/LogoutButton';
 import NavClient from '@/components/NavClient';
-import { getSupabaseServerClient } from '@/lib/supabaseServer';
+import { getServerClient } from '@/lib/supabaseServer';
 
-interface ClientLayoutProps {
-  children: ReactNode;
-}
+type Props = { children: ReactNode };
 
-export default async function ClientLayout({ children }: ClientLayoutProps) {
-  const supabase = getSupabaseServerClient();
+export default async function ClientLayout({ children }: Props) {
+  const supabase = getServerClient();
   const {
-    data: { session },
-  } = await supabase.auth.getSession();
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  if (!session) {
+  if (!user) {
     redirect('/login');
   }
 
