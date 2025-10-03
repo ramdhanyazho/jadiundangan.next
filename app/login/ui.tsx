@@ -69,19 +69,27 @@ export default function LoginClient({ supabaseUrl, supabaseAnon, hasUrl, hasAnon
     }
 
     try {
-      const {
-        data: { user },
-        error,
-      } = await supabase.auth.signInWithPassword({ email, password });
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
-      if (error || !user) {
+      if (error || !data?.user || !data.session) {
         throw error ?? new Error('Login gagal');
       }
 
+      const callbackResponse = await fetch('/auth/callback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ event: 'SIGNED_IN', session: data.session }),
+      });
+
+      if (!callbackResponse.ok) {
+        throw new Error('Gagal menyinkronkan sesi.');
+      }
+
+      const uid = data.user.id;
       const { data: rawProfile, error: profileError } = await supabase
         .from('profiles')
         .select('is_admin, role')
-        .eq('user_id', user.id)
+        .eq('user_id', uid)
         .maybeSingle<ProfileResult>();
 
       if (profileError && profileError.code !== 'PGRST116') {
@@ -91,7 +99,11 @@ export default function LoginClient({ supabaseUrl, supabaseAnon, hasUrl, hasAnon
       const profile = rawProfile ?? null;
       const isAdmin = Boolean(profile && (profile.is_admin === true || profile.role === 'admin'));
 
-      router.replace(isAdmin ? '/admin' : '/client');
+      const params = new URLSearchParams(window.location.search);
+      const back = params.get('redirectedFrom');
+      const target = back || (isAdmin ? '/admin' : '/client');
+
+      router.replace(target);
       router.refresh();
     } catch (error) {
       const message =
