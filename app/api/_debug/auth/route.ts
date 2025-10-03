@@ -1,39 +1,49 @@
-import { getAdminClient } from '@/lib/supabaseAdmin';
-
+/* eslint-disable */
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    const hasUrl = Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL);
-    const hasAnonNextPublic = Boolean(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
-    const hasAnonFallback = Boolean(process.env.SUPABASE_ANON_KEY);
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const anonNP = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    const anonFallback = process.env.SUPABASE_ANON_KEY;
+    const srv = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-    const admin = getAdminClient();
-    // `getAuthSettings` exists in the GoTrue Admin API but is currently missing from the
-    // TypeScript definition shipped with `@supabase/supabase-js`, so we narrow the shape
-    // manually and fall back gracefully if the method is unavailable at runtime.
-    const adminAuth = admin.auth.admin as {
-      getAuthSettings?: () => Promise<{
-        data: { email_password?: { enabled?: boolean | null } } | null;
-        error: { message: string } | null;
-      }>;
-    };
+    const hasUrl = Boolean(url);
+    const hasAnonNEXT_PUBLIC = Boolean(anonNP);
+    const hasAnonFallback = Boolean(anonFallback);
+    const hasService = Boolean(srv);
 
-    const settingsResponse = adminAuth.getAuthSettings
-      ? await adminAuth.getAuthSettings()
-      : { data: null, error: null };
-
-    const emailProviderEnabled =
-      !settingsResponse.error && Boolean(settingsResponse.data?.email_password?.enabled);
+    let emailProviderEnabled = null;
+    let settingsSnippet = null;
+    if (url && srv) {
+      try {
+        const res = await fetch(`${url}/auth/v1/settings`, {
+          headers: {
+            apikey: srv,
+            Authorization: `Bearer ${srv}`,
+          },
+          cache: 'no-store',
+        });
+        const json = await res.json();
+        settingsSnippet = {
+          email_password: json?.email_password ?? null,
+          external: Object.keys(json?.external || {}),
+        };
+        emailProviderEnabled = Boolean(json?.email_password?.enabled);
+      } catch (e) {
+        settingsSnippet = { error: String(e) };
+      }
+    }
 
     return Response.json({
       hasUrl,
-      hasAnonNEXT_PUBLIC: hasAnonNextPublic,
+      hasAnonNEXT_PUBLIC,
       hasAnonFallback,
+      hasService,
       emailProviderEnabled,
+      settingsSnippet,
     });
-  } catch (error) {
-    const message = error instanceof Error ? error.message : 'debug fail';
-    return new Response(message, { status: 500 });
+  } catch (e) {
+    return new Response('debug failed', { status: 500 });
   }
 }
