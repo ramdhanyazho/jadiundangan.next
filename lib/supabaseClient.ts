@@ -2,21 +2,21 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
 import type { Database } from '@/types/db';
 
-let browserClient: SupabaseClient<Database> | undefined;
+let client: SupabaseClient<Database> | undefined;
 
-export const supabaseBrowser = () => {
-  if (browserClient) {
-    return browserClient;
+export function getSupabaseBrowserClient(): SupabaseClient<Database> {
+  if (client) {
+    return client;
   }
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   if (!supabaseUrl || !supabaseAnonKey) {
-    throw new Error('Konfigurasi Supabase untuk browser tidak ditemukan.');
+    throw new Error('Konfigurasi Supabase tidak ditemukan di lingkungan browser.');
   }
 
-  browserClient = createClient<Database>(supabaseUrl, supabaseAnonKey, {
+  client = createClient<Database>(supabaseUrl, supabaseAnonKey, {
     auth: {
       persistSession: true,
       autoRefreshToken: true,
@@ -24,5 +24,5 @@ export const supabaseBrowser = () => {
     },
   });
 
-  return browserClient;
-};
+  return client;
+}

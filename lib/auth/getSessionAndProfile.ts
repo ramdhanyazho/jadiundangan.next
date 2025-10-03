@@ -1,6 +1,6 @@
 import type { Session } from '@supabase/supabase-js';
 
-import { supabaseServer } from '@/lib/supabase/client-server';
+import { getSupabaseServerClient } from '@/lib/supabaseServer';
 import type { Database, Profile } from '@/types/db';
 
 interface SessionAndProfile {
@@ -9,7 +9,7 @@ interface SessionAndProfile {
 }
 
 export async function getSessionAndProfile(): Promise<SessionAndProfile> {
-  const supabase = supabaseServer();
+  const supabase = getSupabaseServerClient();
 
   const {
     data: { session },
@@ -20,7 +20,6 @@ export async function getSessionAndProfile(): Promise<SessionAndProfile> {
   }
 
   type UserId = Database['public']['Tables']['profiles']['Row']['user_id'];
-
   const userId = session.user?.id as UserId | undefined;
 
   if (!userId) {
@@ -31,7 +30,6 @@ export async function getSessionAndProfile(): Promise<SessionAndProfile> {
   const { data: profile, error } = await supabase
     .from('profiles')
     .select('*')
-    // Cast is required due to Supabase type inference limitations with the Session user id
     .eq('user_id', userId as any)
     .maybeSingle<Profile>();
 

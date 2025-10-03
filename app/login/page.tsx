@@ -3,8 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState, type ChangeEvent, type FormEvent } from 'react';
-import { type AuthError } from '@supabase/supabase-js';
-import { supabaseBrowser } from '@/lib/supabase/client-browser';
+import { getSupabaseBrowserClient } from '@/lib/supabaseClient';
 
 const loginFields = [
   { id: 'email', label: 'Email', type: 'email', autoComplete: 'email' },
@@ -23,55 +22,12 @@ export default function LoginPage() {
     setFormState((prev) => ({ ...prev, [id]: value }));
   };
 
-  const buildFriendlyMessage = (supabaseError: AuthError | null) => {
-    if (!supabaseError) {
-      return undefined;
-    }
-
-    const normalizedMessage = supabaseError.message
-      ? supabaseError.message.trim().toLowerCase()
-      : '';
-
-    if (
-      normalizedMessage.includes('invalid login credentials') ||
-      normalizedMessage.includes('invalid email or password') ||
-      normalizedMessage.includes('invalid_grant')
-    ) {
-      return 'Email atau password salah.';
-    }
-
-    if (
-      normalizedMessage.includes('email not confirmed') ||
-      normalizedMessage.includes('email_not_confirmed')
-    ) {
-      return 'Email belum terverifikasi. Silakan periksa email Anda untuk melakukan verifikasi.';
-    }
-
-    if (normalizedMessage.includes('over email rate limit')) {
-      return 'Terlalu banyak percobaan login. Silakan coba lagi beberapa saat lagi.';
-    }
-
-    if (normalizedMessage.includes('no api key found')) {
-      return 'Konfigurasi Supabase tidak ditemukan. Silakan hubungi administrator.';
-    }
-
-    if (supabaseError.status === 400) {
-      return 'Permintaan login tidak valid. Periksa kembali email dan password Anda.';
-    }
-
-    if (supabaseError.status >= 500) {
-      return 'Layanan login sedang bermasalah. Silakan coba lagi beberapa saat lagi.';
-    }
-
-    return undefined;
-  };
-
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsLoading(true);
     setError(null);
 
-    const supabase = supabaseBrowser();
+    const supabase = getSupabaseBrowserClient();
 
     const email = formState.email.trim();
     const password = formState.password;
@@ -94,9 +50,7 @@ export default function LoginPage() {
       });
 
       if (signInError || !user) {
-        const friendlyMessage = buildFriendlyMessage(signInError ?? null) ?? signInError?.message;
-
-        throw friendlyMessage ? new Error(friendlyMessage) : signInError ?? new Error('Gagal masuk.');
+        throw signInError ?? new Error('Gagal masuk.');
       }
 
       const { data: rawProfile, error: profileError } = await supabase
@@ -111,20 +65,26 @@ export default function LoginPage() {
 
       const profile = rawProfile as { is_admin?: boolean | null; role?: string | null } | null;
       const isAdmin = profile?.is_admin === true || profile?.role === 'admin';
-      const destination = isAdmin ? '/admin' : '/dashboard';
+      const destination = isAdmin ? '/admin' : '/client';
 
       router.replace(destination);
       router.refresh();
     } catch (submitError) {
-      const message = (() => {
-        if (submitError instanceof TypeError && submitError.message === 'Failed to fetch') {
-          return 'Tidak dapat terhubung ke layanan login. Periksa koneksi internet Anda atau konfigurasi Supabase.';
-        }
+      let message = 'Terjadi kesalahan saat masuk.';
 
-        return submitError instanceof Error
-          ? submitError.message
-          : 'Terjadi kesalahan saat masuk.';
-      })();
+      if (submitError instanceof TypeError && submitError.message) {
+        message = submitError.message;
+      } else if (submitError instanceof Error && submitError.message) {
+        message = submitError.message;
+      } else if (
+        submitError &&
+        typeof submitError === 'object' &&
+        'message' in submitError &&
+        typeof (submitError as { message?: unknown }).message === 'string'
+      ) {
+        message = (submitError as { message: string }).message;
+      }
+
       setError(message);
     } finally {
       setIsLoading(false);

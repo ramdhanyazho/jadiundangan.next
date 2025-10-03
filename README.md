@@ -1,9 +1,9 @@
 # JadiUndangan — Next.js + TailwindCSS + Supabase (Blueprint v3)
 
 ## Setup
-1) `cp .env.example .env.local` lalu isi `NEXT_PUBLIC_SUPABASE_URL` dan `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
+1) `cp .env.example .env.local` lalu isi `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, dan `BOOTSTRAP_TOKEN`.
 2) Jalankan: `npm install` lalu `npm run dev`.
-3) Di Supabase, buka **SQL Editor** dan jalankan `supabase/schema.sql` (buat bucket Storage `media` public).
+3) Di Supabase, buka **SQL Editor** dan jalankan `supabase/schema.sql` lalu `supabase/trigger_profiles.sql` (buat bucket Storage `media` public)
 
 ### Kredensial Admin Supabase
 - Password **tidak** disimpan di tabel `profiles`. Supabase Auth menyimpan hash password secara terpisah di sistem autentikasinya.
@@ -19,5 +19,19 @@
 - Tracking kunjungan via `/api/track-visit` + fungsi `increment_view_count`.
 - Dashboard Client (website settings, buku tamu, metrik, testimoni, support).
 - Dashboard Admin (users, themes, payments, settings).
+
+## Debug Kit Supabase
+- **Health check**: buka `/api/_debug/auth` dan pastikan respons JSON menampilkan `hasUrl: true`, `hasAnon: true`, dan `authSettings.emailEnabled: true` untuk provider email Supabase.
+- **Seed admin pertama (sekali saja)**:
+
+```bash
+curl -X POST https://<domain>/api/_admin/create-user \
+  -H "x-bootstrap-token: $BOOTSTRAP_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"email":"admin@gmail.com","password":"Admin#123","is_admin":true}'
+```
+
+- Setelah seeding, login memakai kredensial tersebut di `/login`.
+
 
 © 2025 JadiUndangan
