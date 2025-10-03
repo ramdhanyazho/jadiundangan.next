@@ -1,27 +1,16 @@
-import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+import { createClient } from '@supabase/supabase-js';
 
-import type { Database } from '@/types/db';
-
-let adminClient: SupabaseClient<Database> | null = null;
-
-export function getAdminClient(): SupabaseClient<Database> {
-  if (adminClient) {
-    return adminClient;
+/**
+ * Admin client — server-only.
+ * Never import this in Client Components.
+ */
+export function getAdminClient() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !serviceKey) {
+    throw new Error('Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY');
   }
-
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-  if (!supabaseUrl || !serviceRoleKey) {
-    throw new Error('Supabase admin client tidak dapat dibuat tanpa konfigurasi lengkap.');
-  }
-
-  adminClient = createClient<Database>(supabaseUrl, serviceRoleKey, {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false,
-    },
+  return createClient(url, serviceKey, {
+    auth: { autoRefreshToken: false, persistSession: false },
   });
-
-  return adminClient;
 }
