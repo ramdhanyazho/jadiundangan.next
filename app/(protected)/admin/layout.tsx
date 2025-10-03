@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { redirect } from 'next/navigation';
 
-import NavAdmin from '@/components/NavAdmin';
+import { getPublicSupabaseEnv } from '@/lib/publicEnv';
 import { getServerClient } from '@/lib/supabaseServer';
 import type { Database } from '@/types/db';
 
@@ -32,9 +32,16 @@ export default async function AdminLayout({ children }: Props) {
     redirect('/client');
   }
 
+  const env = getPublicSupabaseEnv();
+
   return (
     <div className="min-h-screen bg-slate-50">
-      <NavAdmin />
+      <NavAdmin
+        supabaseUrl={env.url}
+        supabaseAnon={env.anon}
+        hasUrl={env.hasUrl}
+        hasAnon={env.hasAnon}
+      />
       <main className="mx-auto max-w-6xl px-6 py-10">{children}</main>
     </div>
   );

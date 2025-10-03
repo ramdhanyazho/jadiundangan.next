@@ -2,7 +2,15 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+
 import LogoutButton from '@/components/LogoutButton';
+
+type NavAdminProps = {
+  supabaseUrl: string;
+  supabaseAnon: string;
+  hasUrl: boolean;
+  hasAnon: boolean;
+};
 
 const adminNavItems = [
   { href: '/admin', label: 'Dashboard' },
@@ -15,7 +23,7 @@ const adminNavItems = [
 const isActive = (currentPath: string, target: string) =>
   currentPath === target || currentPath.startsWith(`${target}/`);
 
-export default function NavAdmin() {
+export default function NavAdmin({ supabaseUrl, supabaseAnon, hasUrl, hasAnon }: NavAdminProps) {
   const pathname = usePathname();
 
   return (
@@ -34,7 +42,12 @@ export default function NavAdmin() {
             </Link>
           ))}
         </nav>
-        <LogoutButton />
+        <LogoutButton
+          supabaseUrl={supabaseUrl}
+          supabaseAnon={supabaseAnon}
+          hasUrl={hasUrl}
+          hasAnon={hasAnon}
+        />
       </div>
     </header>
   );

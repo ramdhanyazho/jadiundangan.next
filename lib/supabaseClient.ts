@@ -3,21 +3,19 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 
 import type { Database } from '@/types/db';
 
-let browserClient: SupabaseClient<Database> | null = null;
+const browserClientCache = new Map<string, SupabaseClient<Database>>();
 
-export function getBrowserClient(): SupabaseClient<Database> {
-  if (browserClient) {
-    return browserClient;
+export function getBrowserClient(url: string, anonKey: string): SupabaseClient<Database> {
+  if (!url || !anonKey) {
+    throw new Error('Supabase env not provided to browser client');
   }
 
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!browserClientCache.has(cacheKey)) {
+    browserClientCache.set(cacheKey, createBrowserClient<Database>(url, anonKey));
 
   if (!supabaseUrl || !supabaseAnonKey) {
     throw new Error('Konfigurasi Supabase tidak ditemukan di lingkungan browser.');
   }
 
-  browserClient = createBrowserClient<Database>(supabaseUrl, supabaseAnonKey);
-
-  return browserClient;
+  return browserClientCache.get(cacheKey)!;
 }

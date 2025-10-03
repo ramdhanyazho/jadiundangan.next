@@ -1,7 +1,7 @@
-import { getSupabaseAdminClient } from '@/lib/supabaseAdmin';
+import { getAdminClient } from '@/lib/supabaseAdmin';
 
 export default async function AdminDashboardPage() {
-  const supabase = getSupabaseAdminClient();
+  const supabase = getAdminClient();
 
   const [totalUsersResult, totalInvitationsResult, pendingPaymentsResult] = await Promise.all([
     supabase.from('profiles').select('id', { count: 'exact', head: true }),

@@ -1,107 +1,79 @@
-import { NextResponse } from 'next/server';
+import crypto from 'crypto';
 
-import { getSupabaseAdminClient } from '@/lib/supabaseAdmin';
-import type { Database } from '@/types/db';
+import { getAdminClient } from '@/lib/supabaseAdmin';
 
-interface BootstrapPayload {
-  email?: string;
-  password?: string;
-  is_admin?: boolean;
+function safeEq(a?: string | null, b?: string | null) {
+  const aBuffer = Buffer.from(a ?? '');
+  const bBuffer = Buffer.from(b ?? '');
+
+  if (aBuffer.length !== bBuffer.length) {
+    return false;
+  }
+
+  return crypto.timingSafeEqual(aBuffer, bBuffer);
 }
 
-export async function POST(request: Request) {
-  const expectedToken = process.env.BOOTSTRAP_TOKEN;
+export async function POST(req: Request) {
+  const providedToken = req.headers.get('x-bootstrap-token');
+  const secret = process.env.BOOTSTRAP_TOKEN;
 
-  if (!expectedToken) {
-    return NextResponse.json({ error: 'Bootstrap token belum dikonfigurasi.' }, { status: 500 });
+  if (!secret || !safeEq(providedToken, secret)) {
+    return new Response('Unauthorized', { status: 401 });
   }
-
-  const providedToken = request.headers.get('x-bootstrap-token');
-
-  if (!providedToken || providedToken !== expectedToken) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
-  let payload: BootstrapPayload;
 
   try {
-    payload = (await request.json()) as BootstrapPayload;
-  } catch (error) {
-    return NextResponse.json({ error: 'Body JSON tidak valid.' }, { status: 400 });
-  }
+    const body = await req.json();
+    const email = typeof body?.email === 'string' ? body.email.trim() : '';
+    const password = typeof body?.password === 'string' ? body.password : '';
+    const isAdmin = body?.is_admin === true;
 
-  const email = payload.email?.trim();
-  const password = payload.password;
-  const isAdmin = payload.is_admin === true;
+    if (!email || !password) {
+      return new Response('Email dan password wajib diisi.', { status: 400 });
+    }
 
-  if (!email || !password) {
-    return NextResponse.json({ error: 'Email dan password wajib diisi.' }, { status: 400 });
-  }
+    const admin = getAdminClient();
 
-  const supabase = getSupabaseAdminClient();
-  const profilesTable = 'profiles' as const;
+    const { data, error } = await admin.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true,
+    });
 
-  const { data: createdUser, error: createError } = await supabase.auth.admin.createUser({
-    email,
-    password,
-    email_confirm: true,
-  });
+    if (error || !data?.user) {
+      return new Response(error?.message || 'Gagal membuat pengguna.', {
+        status: error?.status ?? 400,
+      });
+    }
 
-  if (createError || !createdUser?.user) {
-    return NextResponse.json(
-      { error: createError?.message ?? 'Gagal membuat pengguna.' },
-      { status: createError?.status ?? 400 }
-    );
-  }
+    const user = data.user;
 
-  const userId = createdUser.user.id;
+    const { error: upsertError } = await admin
+      .from('profiles')
+      .upsert(
+        {
+          user_id: user.id,
+          email,
+          is_admin: isAdmin,
+          role: isAdmin ? 'admin' : 'client',
+        },
+        { onConflict: 'user_id' }
+      );
 
-  type ProfileInsert = Database['public']['Tables']['profiles']['Insert'];
-  const profilePayload: ProfileInsert = {
-    user_id: userId,
-    email,
-    is_admin: isAdmin,
-  };
+    if (upsertError) {
+      return new Response(upsertError.message, { status: 400 });
+    }
 
-  let includeRoleColumn = false;
-
-  const profilesQuery = supabase.from(profilesTable);
-  const { error: roleProbeError } = await profilesQuery.select('role').limit(1);
-
-  if (!roleProbeError || roleProbeError.code === 'PGRST116') {
-    includeRoleColumn = true;
-  } else if (roleProbeError.code !== '42703') {
-    console.warn('Tidak dapat memeriksa kolom role pada tabel profiles:', roleProbeError.message);
-  }
-
-  if (includeRoleColumn) {
-    profilePayload.role = 'admin';
-  }
-
-  const { error: profileError } = await (profilesQuery as any).upsert(profilePayload, {
-    onConflict: 'user_id',
-  });
-
-  if (profileError) {
-    return NextResponse.json(
-      { error: `Pengguna dibuat, namun gagal menyimpan profil: ${profileError.message}` },
-      { status: 500 }
-    );
-  }
-
-  return NextResponse.json(
-    {
-      user: {
-        id: userId,
-        email,
-      },
-      profile: {
-        user_id: userId,
+    return Response.json(
+      {
+        ok: true,
+        user_id: user.id,
         email,
         is_admin: isAdmin,
-        role: includeRoleColumn ? 'admin' : undefined,
       },
-    },
-    { status: 201 }
-  );
+      { status: 201 }
+    );
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Invalid payload';
+    return new Response(message, { status: 400 });
+  }
 }
