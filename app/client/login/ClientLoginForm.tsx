@@ -3,12 +3,9 @@
 import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { createClient } from '@supabase/supabase-js';
+import type { Session } from '@supabase/supabase-js';
 
-const sb = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-);
+import { supabaseBrowser } from '@/lib/supabaseBrowser';
 
 export default function ClientLoginForm() {
   const [err, setErr] = useState<string | null>(null);
@@ -28,14 +25,27 @@ export default function ClientLoginForm() {
     const email = String(fd.get('email') || '');
     const password = String(fd.get('password') || '');
 
-    const { error } = await sb.auth.signInWithPassword({ email, password });
-    if (error) {
-      setErr(error.message);
+    const { data, error } = await supabaseBrowser.auth.signInWithPassword({ email, password });
+    if (error || !data.session) {
+      setErr(error?.message ?? 'Gagal masuk.');
       setLoading(false);
       return;
     }
 
-    await sb.auth.getSession();
+    const session: Session = data.session;
+
+    const callbackResponse = await fetch('/auth/callback', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ event: 'SIGNED_IN', session }),
+    });
+
+    if (!callbackResponse.ok) {
+      setErr('Gagal menyinkronkan sesi login.');
+      setLoading(false);
+      return;
+    }
+
     router.refresh();
     window.location.assign(nextUrl);
   }
