@@ -5,6 +5,26 @@
 2) Jalankan: `npm install` lalu `npm run dev`.
 3) Di Supabase, buka **SQL Editor** dan jalankan `supabase/schema.sql` lalu `supabase/trigger_profiles.sql` (buat bucket Storage `media` public)
 
+### Bootstrap Admin
+
+1. Pastikan ENV di Vercel:
+   - `NEXT_PUBLIC_SUPABASE_URL`
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+   - `SUPABASE_SERVICE_ROLE_KEY` (server-only)
+   - `BOOTSTRAP_TOKEN` (server-only)
+
+2. Jalankan endpoint:
+```bash
+export BOOTSTRAP_TOKEN='isi_token_kamu'
+curl -iS -X POST 'https://<APP_DOMAIN>/api/admin-create-user' \
+  -H "x-bootstrap-token: $BOOTSTRAP_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"email":"admin@gmail.com","password":"P@ssw0rd!","is_admin":true}'
+```
+
+(Jika profil belum muncul) jalankan supabase/sql/patch_profiles_admin.sql di Supabase SQL Editor.
+
+
 ### Kredensial Admin Supabase
 - Password **tidak** disimpan di tabel `profiles`. Supabase Auth menyimpan hash password secara terpisah di sistem autentikasinya.
 - Untuk membuat/ubah password admin, buka **Authentication → Users** di dashboard Supabase, pilih user yang diinginkan, lalu atur password atau kirim tautan reset.
