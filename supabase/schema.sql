@@ -95,30 +95,19 @@ create table if not exists profiles (
 
 create table if not exists themes (
   id uuid primary key default gen_random_uuid(),
-  name text not null,
   slug text unique not null,
-  is_active boolean default true,
+  name text not null,
+  status text not null check (status in ('active','inactive')) default 'inactive',
+  preview_url text,
+  package_path text,
   created_at timestamptz default now()
 );
 
-create table if not exists global_settings (
-  id int primary key default 1,
-  trial_days int default 7,
-  active_days int default 180,
-  price numeric default 250000,
-  bank_name text,
-  bank_number text,
-  bank_owner text,
-  midtrans_enabled boolean default false,
-  midtrans_server_key text,
-  smtp_host text,
-  smtp_email text,
-  smtp_password text,
-  wa_token text,
-  whatsapp_number text,
-  whatsapp_message text
+create table if not exists settings (
+  key text primary key,
+  value jsonb not null,
+  updated_at timestamptz default now()
 );
-insert into global_settings (id) values (1) on conflict (id) do nothing;
 
 -- Visits, Testimonials, Payments
 create table if not exists visit_logs (
@@ -140,13 +129,10 @@ create table if not exists testimonials (
 
 create table if not exists payments (
   id uuid primary key default gen_random_uuid(),
-  user_id uuid,
-  user_email text,
-  invitation_id uuid references invitations(id) on delete set null,
-  amount numeric,
-  method text,
-  status text,
-  snap_token text,
+  user_id uuid not null references auth.users(id) on delete cascade,
+  amount numeric(12,2) not null default 0,
+  status text not null check (status in ('unpaid','paid')) default 'unpaid',
+  invoice_no text,
   created_at timestamptz default now()
 );
 
@@ -159,10 +145,49 @@ alter table gifts enable row level security;
 alter table stories enable row level security;
 alter table profiles enable row level security;
 alter table themes enable row level security;
-alter table global_settings enable row level security;
+alter table settings enable row level security;
 alter table visit_logs enable row level security;
 alter table testimonials enable row level security;
 alter table payments enable row level security;
+
+-- User boleh melihat payment miliknya
+do $$
+begin
+  if not exists (
+    select 1 from pg_policies
+    where schemaname = 'public' and tablename = 'payments' and policyname = 'payments_select_own'
+  ) then
+    create policy "payments_select_own" on public.payments
+      for select using (auth.uid() = user_id);
+  end if;
+end
+$$;
+
+-- Semua user boleh melihat tema aktif
+do $$
+begin
+  if not exists (
+    select 1 from pg_policies
+    where schemaname = 'public' and tablename = 'themes' and policyname = 'themes_select_public'
+  ) then
+    create policy "themes_select_public" on public.themes
+      for select using (true);
+  end if;
+end
+$$;
+
+-- Semua orang boleh membaca settings
+do $$
+begin
+  if not exists (
+    select 1 from pg_policies
+    where schemaname = 'public' and tablename = 'settings' and policyname = 'settings_select_all'
+  ) then
+    create policy "settings_select_all" on public.settings
+      for select using (true);
+  end if;
+end
+$$;
 
 -- public read published
 create policy "public read invitations" on invitations for select to anon, authenticated using (is_published = true);
@@ -170,8 +195,6 @@ create policy "public read events when parent published" on events for select to
 create policy "public read media when parent published" on media for select to anon, authenticated using ( exists (select 1 from invitations i where i.id = invitation_id and i.is_published = true) );
 create policy "public read gifts when parent published" on gifts for select to anon, authenticated using ( exists (select 1 from invitations i where i.id = invitation_id and i.is_published = true) );
 create policy "public read stories when parent published" on stories for select to anon, authenticated using ( exists (select 1 from invitations i where i.id = invitation_id and i.is_published = true) );
-create policy "public read themes" on themes for select to anon, authenticated using (is_active = true);
-create policy "public read settings" on global_settings for select to anon, authenticated using (true);
 create policy "public read guests when parent published" on guests for select to anon, authenticated using ( exists (select 1 from invitations i where i.id = invitation_id and i.is_published = true) );
 create policy "public insert guests" on guests for insert to anon, authenticated with check (true);
 create policy "public insert visits" on visit_logs for insert to anon, authenticated with check (true);
@@ -180,7 +203,6 @@ create policy "public insert visits" on visit_logs for insert to anon, authentic
 create policy "owner update invitations" on invitations for update to authenticated using (user_id = auth.uid());
 create policy "owner read visits" on visit_logs for select to authenticated using ( exists (select 1 from invitations i where i.id = invitation_id and i.user_id = auth.uid()) );
 create policy "read own profile" on profiles for select to authenticated using (user_id = auth.uid());
-create policy "public read payments" on payments for select to anon, authenticated using (true);
 
 -- Seed example
 insert into invitations (slug, title, groom_name, bride_name, groom_nickname, bride_nickname, date_display, theme_slug, is_published)
@@ -221,3 +243,45 @@ on conflict (user_id) do update set
   full_name = excluded.full_name,
   password_hash = excluded.password_hash,
   is_admin = true;
+
+-- STORAGE bucket untuk tema
+insert into storage.buckets (id, name, public) values ('themes','themes', true)
+on conflict (id) do nothing;
+
+do $$
+begin
+  if not exists (
+    select 1 from pg_policies
+    where schemaname = 'storage' and tablename = 'objects' and policyname = 'themes_public_read'
+  ) then
+    create policy "themes_public_read" on storage.objects
+      for select using (bucket_id = 'themes');
+  end if;
+end
+$$;
+
+do $$
+begin
+  if not exists (
+    select 1 from pg_policies
+    where schemaname = 'storage' and tablename = 'objects' and policyname = 'themes_owner_write'
+  ) then
+    create policy "themes_owner_write" on storage.objects
+      for insert to authenticated using (bucket_id = 'themes')
+      with check (bucket_id = 'themes');
+  end if;
+end
+$$;
+
+do $$
+begin
+  if not exists (
+    select 1 from pg_policies
+    where schemaname = 'storage' and tablename = 'objects' and policyname = 'themes_owner_update'
+  ) then
+    create policy "themes_owner_update" on storage.objects
+      for update to authenticated using (bucket_id = 'themes')
+      with check (bucket_id = 'themes');
+  end if;
+end
+$$;
