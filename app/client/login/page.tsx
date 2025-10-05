@@ -1,69 +1,75 @@
 'use client';
 
-import { Suspense, useState } from 'react';
+import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
+import { createClient } from '@supabase/supabase-js';
 
-import { supabaseBrowser } from '@/lib/supabaseBrowser';
+const sb = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
-function ClientLoginContent() {
+export default function ClientLogin() {
   const [err, setErr] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
   const sp = useSearchParams();
+  const router = useRouter();
   const nextUrl = sp.get('next') || '/client';
+  const verified = sp.get('verified') === '1';
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (loading) return;
     setErr(null);
     setLoading(true);
+
     const fd = new FormData(e.currentTarget);
     const email = String(fd.get('email') || '');
     const password = String(fd.get('password') || '');
 
-    const { data, error } = await supabaseBrowser.auth.signInWithPassword({ email, password });
-    setLoading(false);
-    if (error) return setErr(error.message);
-
-    try {
-      await fetch('/auth/callback', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ event: 'SIGNED_IN', session: data.session }),
-      });
-    } catch (callbackError) {
-      console.error(callbackError);
+    const { error } = await sb.auth.signInWithPassword({ email, password });
+    if (error) {
+      setErr(error.message);
+      setLoading(false);
+      return;
     }
 
-    router.replace(nextUrl);
+    await sb.auth.getSession();
+    router.refresh();
+    window.location.assign(nextUrl);
   }
 
   return (
     <div className="min-h-screen grid place-items-center p-6">
-      <form onSubmit={onSubmit} className="w-full max-w-md space-y-4 rounded-xl bg-white p-6 shadow">
-        <h1 className="text-xl font-semibold">Login Akun</h1>
-        <input name="email" type="email" required placeholder="Email" className="w-full rounded border px-3 py-2" />
-        <input name="password" type="password" required placeholder="Password" className="w-full rounded border px-3 py-2" />
+      <form onSubmit={onSubmit} className="w-full max-w-md bg-white shadow rounded-xl p-6 space-y-4">
+        <div className="flex items-center justify-between">
+          <h1 className="text-xl font-semibold">Login Akun</h1>
+          <Link href="/" className="text-sm text-slate-600 hover:underline">
+            ← Kembali ke Beranda
+          </Link>
+        </div>
+
+        <input name="email" type="email" required placeholder="Email" className="w-full border rounded px-3 py-2" />
+        <input
+          name="password"
+          type="password"
+          required
+          placeholder="Password"
+          className="w-full border rounded px-3 py-2"
+        />
+
+        {verified && <p className="text-sm text-emerald-600">Email berhasil dikonfirmasi. Silakan login.</p>}
         {err && <p className="text-sm text-rose-600">{err}</p>}
-        <button disabled={loading} className="w-full rounded bg-slate-900 py-2 text-white">
+
+        <button
+          disabled={loading}
+          className="w-full py-2 rounded bg-slate-900 text-white disabled:opacity-60"
+          type="submit"
+        >
           {loading ? 'Masuk…' : 'Masuk'}
         </button>
       </form>
     </div>
-  );
-}
-
-export default function ClientLogin() {
-  return (
-    <Suspense
-      fallback={
-        <div className="min-h-screen grid place-items-center p-6">
-          <div className="w-full max-w-md rounded-xl bg-white p-6 shadow">
-            <p className="text-center text-sm text-slate-500">Memuat formulir…</p>
-          </div>
-        </div>
-      }
-    >
-      <ClientLoginContent />
-    </Suspense>
   );
 }

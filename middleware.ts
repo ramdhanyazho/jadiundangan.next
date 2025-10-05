@@ -26,10 +26,15 @@ export async function middleware(req: NextRequest) {
 
   const path = req.nextUrl.pathname;
 
+  const publicPaths = new Set(['/admin', '/admin/login', '/client/login', '/client/register', '/auth/callback']);
+  if (publicPaths.has(path)) {
+    return res;
+  }
+
   // ===== Admin rules =====
   // /admin  -> public (login page)
   // /admin/* (kecuali /admin & /admin/login) -> perlu user admin
-  if (path.startsWith('/admin') && path !== '/admin' && path !== '/admin/login') {
+  if (path.startsWith('/admin')) {
     if (!user) {
       return NextResponse.redirect(new URL('/admin', req.url));
     }
@@ -38,9 +43,7 @@ export async function middleware(req: NextRequest) {
   // ===== Client rules =====
   // /client/login & /client/register -> selalu boleh diakses (jangan auto-redirect)
   // /client (dashboard) & /client/* selain dua di atas -> butuh user
-  const isClientLogin = path === '/client/login';
-  const isClientRegister = path === '/client/register';
-  if (path.startsWith('/client') && !isClientLogin && !isClientRegister) {
+  if (path.startsWith('/client')) {
     if (path === '/client' || path.startsWith('/client/')) {
       if (!user) {
         return NextResponse.redirect(new URL('/client/login', req.url));

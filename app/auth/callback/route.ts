@@ -1,36 +1,32 @@
+import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-import { createServerClient } from '@supabase/ssr';
+import { createServerClient, type CookieOptions } from '@supabase/ssr';
 
-function cookieAdapter() {
-  const store = cookies();
-  return {
-    get(name: string) {
-      return store.get(name)?.value;
-    },
-    set(name: string, value: string, options: any) {
-      store.set(name, value, options);
-    },
-    remove(name: string, options: any) {
-      store.set(name, '', { ...options, maxAge: 0 });
-    },
-  };
-}
+export async function GET(request: Request) {
+  const url = new URL(request.url);
+  const code = url.searchParams.get('code');
 
-export async function POST(request: Request) {
-  const body = await request.json().catch(() => ({}));
-  const { event, session } = body ?? {};
+  if (code) {
+    const cookieStore = cookies();
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          get: (name: string) => cookieStore.get(name)?.value,
+          set: (name: string, value: string, options: CookieOptions) => {
+            cookieStore.set(name, value, options);
+          },
+          remove: (name: string, options: CookieOptions) => {
+            cookieStore.set(name, '', { ...options, maxAge: 0 });
+          },
+        },
+      }
+    );
 
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-  const anon =
-    (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY)!;
-
-  const supabase = createServerClient(url, anon, { cookies: cookieAdapter() });
-
-  if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-    await supabase.auth.setSession(session);
-  } else if (event === 'SIGNED_OUT') {
-    await supabase.auth.signOut();
+    await supabase.auth.exchangeCodeForSession(code);
   }
 
-  return new Response(null, { status: 200 });
+  const redirectTo = new URL('/client/login?verified=1', url.origin);
+  return NextResponse.redirect(redirectTo);
 }

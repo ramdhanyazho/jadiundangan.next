@@ -21,24 +21,14 @@ export default function ClientRegister() {
     const groom = String(fd.get('groom_name') || '');
     const bride = String(fd.get('bride_name') || '');
 
-    const { data: sign, error: e1 } = await supabaseBrowser.auth.signUp({
+    const { error: e1 } = await supabaseBrowser.auth.signUp({
       email,
       password,
-      options: { emailRedirectTo: `${location.origin}/client/login` },
+      options: { emailRedirectTo: `${location.origin}/auth/callback` },
     });
     if (e1) {
       setLoading(false);
       return setErr(e1.message);
-    }
-
-    try {
-      await fetch('/auth/callback', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ event: 'SIGNED_IN', session: sign?.session }),
-      });
-    } catch (callbackError) {
-      console.error(callbackError);
     }
 
     try {
