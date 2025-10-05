@@ -44,8 +44,8 @@ export default function SettingsPage() {
     setSaving(true);
     setMsg(null);
 
-    const { error, data } = await sb
-      .from('invitations')
+    const { error, data } = await (sb
+      .from('invitations') as any)
       .update({
         ...form,
         updated_at: new Date().toISOString(),

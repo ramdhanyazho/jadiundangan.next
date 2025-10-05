@@ -5,10 +5,13 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@supabase/supabase-js';
 
-const sb = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+const fallbackUrl = 'https://placeholder.supabase.co';
+const fallbackAnonKey = 'public-anon-key';
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || fallbackUrl;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || fallbackAnonKey;
+
+const sb = createClient(supabaseUrl, supabaseAnonKey);
 
 export default function AdminLoginPage() {
   const [err, setErr] = useState<string | null>(null);

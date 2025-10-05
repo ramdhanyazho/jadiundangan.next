@@ -28,8 +28,8 @@ export function useActiveInvitation() {
         return;
       }
 
-      const { data, error } = await sb
-        .from('invitations')
+      const { data, error } = await (sb
+        .from('invitations') as any)
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })

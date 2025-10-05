@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { handleUpload } from '@vercel/blob';
+import { handleUpload, type HandleUploadBody } from '@vercel/blob/client';
 import { createClient } from '@supabase/supabase-js';
 
 import type { Database } from '@/types/db';
@@ -14,7 +14,7 @@ type UploadMetadata = {
 };
 
 const admin = () =>
-  createClient<Database>(
+  createClient<Database, 'public'>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
     {
@@ -31,15 +31,17 @@ export async function POST(req: NextRequest) {
   let completedPayload: { blob?: { url: string }; tokenPayload?: string | null } | null = null;
   let metadata: UploadMetadata | null = null;
 
-  const body = (await req.json().catch(() => null)) as Record<string, unknown> | null;
-  if (!body) {
+  const rawBody = (await req.json().catch(() => null)) as Record<string, unknown> | null;
+  if (!rawBody) {
     return new NextResponse('Invalid callback', { status: 400 });
   }
+
+  const handleUploadBody = rawBody as unknown as HandleUploadBody;
 
   await handleUpload({
     token,
     request: req,
-    body,
+    body: handleUploadBody,
     onBeforeGenerateToken: async () => ({}),
     onUploadCompleted: async (payload) => {
       completedPayload = payload;
@@ -50,12 +52,12 @@ export async function POST(req: NextRequest) {
           console.error('[blob/callback] failed to parse tokenPayload', error);
         }
       }
-        if (!metadata && body && typeof body === 'object' && 'metadata' in body) {
-          const raw = (body as { metadata?: UploadMetadata }).metadata;
-          if (raw) {
-            metadata = raw;
-          }
+      if (!metadata && rawBody && typeof rawBody === 'object' && 'metadata' in rawBody) {
+        const raw = (rawBody as { metadata?: UploadMetadata }).metadata;
+        if (raw) {
+          metadata = raw;
         }
+      }
     },
   }).catch((error) => {
     console.error('[blob/callback] handleUpload failed', error);
@@ -79,13 +81,15 @@ export async function POST(req: NextRequest) {
     return new NextResponse('Forbidden', { status: 403 });
   }
 
-  const { error } = await supa.from('media').insert({
+  const mediaPayload: Database['public']['Tables']['media']['Insert'] = {
     invitation_id: metadata.invitation_id,
     type: metadata.media_type,
     url: payload.blob.url,
     caption: metadata.original_name,
     sort_index: 0,
-  });
+  };
+
+  const { error } = await (supa as any).from('media').insert(mediaPayload);
 
   if (error) {
     console.error('[blob/callback] insert failed', error);
