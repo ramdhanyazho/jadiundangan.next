@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import type { Session } from '@supabase/supabase-js';
 
-import { supabaseBrowser } from '@/lib/supabaseBrowser';
+import { sb } from '@/lib/supabaseBrowser';
 
 export default function ClientLoginForm() {
   const [err, setErr] = useState<string | null>(null);
@@ -25,7 +25,7 @@ export default function ClientLoginForm() {
     const email = String(fd.get('email') || '');
     const password = String(fd.get('password') || '');
 
-    const { data, error } = await supabaseBrowser.auth.signInWithPassword({ email, password });
+    const { data, error } = await sb.auth.signInWithPassword({ email, password });
     if (error || !data.session) {
       setErr(error?.message ?? 'Gagal masuk.');
       setLoading(false);

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-import { supabaseBrowser } from '@/lib/supabaseBrowser';
+import { sb } from '@/lib/supabaseBrowser';
 
 export default function ClientRegister() {
   const [err, setErr] = useState<string | null>(null);
@@ -21,7 +21,7 @@ export default function ClientRegister() {
     const groom = String(fd.get('groom_name') || '');
     const bride = String(fd.get('bride_name') || '');
 
-    const { error: e1 } = await supabaseBrowser.auth.signUp({
+    const { error: e1 } = await sb.auth.signUp({
       email,
       password,
       options: { emailRedirectTo: `${location.origin}/auth/callback` },
