@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 import { sb } from '@/lib/supabaseBrowser';
@@ -48,7 +49,12 @@ export default function ClientRegister() {
   return (
     <div className="min-h-screen grid place-items-center p-6">
       <form onSubmit={onSubmit} className="w-full max-w-lg space-y-4 rounded-xl bg-white p-6 shadow">
-        <h1 className="text-xl font-semibold">Daftar Akun</h1>
+        <div className="flex items-center justify-between">
+          <h1 className="text-xl font-semibold">Daftar Akun</h1>
+          <Link href="/" className="text-sm text-slate-600 hover:underline">
+            ← Kembali ke Beranda
+          </Link>
+        </div>
         <input name="full_name" required placeholder="Nama Lengkap" className="w-full rounded border px-3 py-2" />
         <input name="email" type="email" required placeholder="Email" className="w-full rounded border px-3 py-2" />
         <input name="password" type="password" required placeholder="Password" className="w-full rounded border px-3 py-2" />

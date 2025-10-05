@@ -9,6 +9,7 @@ const items = [
   { href: '/client/guests', label: 'Buku Tamu' },
   { href: '/client/visitors', label: 'Riwayat Pengunjung' },
   { href: '/client/testimonials', label: 'Testimoni' },
+  { href: '/client/gallery', label: 'Gallery' },
   { href: '/client/contact', label: 'Hubungi Kami' },
 ];
 
