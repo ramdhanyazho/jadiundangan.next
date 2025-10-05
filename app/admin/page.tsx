@@ -25,14 +25,24 @@ export default function AdminLoginPage() {
     const email = String(fd.get('email') || '');
     const password = String(fd.get('password') || '');
 
-    const { error } = await sb.auth.signInWithPassword({ email, password });
-    if (error) {
-      setErr(error.message);
+    const { data, error } = await sb.auth.signInWithPassword({ email, password });
+    if (error || !data?.session) {
+      setErr(error?.message || 'Login gagal.');
       setLoading(false);
       return;
     }
 
-    await sb.auth.getSession();
+    const callbackResponse = await fetch('/auth/callback', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ event: 'SIGNED_IN', session: data.session }),
+    });
+
+    if (!callbackResponse.ok) {
+      setErr('Gagal menyinkronkan sesi.');
+      setLoading(false);
+      return;
+    }
 
     try {
       const r = await fetch('/api/whoami', { cache: 'no-store' });
