@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic';
 
 import type { ReactNode } from 'react';
 import { redirect } from 'next/navigation';
+
 import { getServerClient } from '@/lib/supabaseServer';
 import AdminNav from '@/components/AdminNav';
 
@@ -12,7 +13,7 @@ export default async function AdminLayout({ children }: Props) {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect('/login');
+  if (!user) redirect('/admin');
 
   const { data: profile, error } = await supabase
     .from('profiles')

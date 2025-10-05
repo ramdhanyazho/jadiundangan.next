@@ -1,39 +1,56 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@supabase/ssr';
+import { createServerClient, type CookieOptions } from '@supabase/ssr';
 
 export async function middleware(req: NextRequest) {
   const res = NextResponse.next();
 
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-  const anon =
-    (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY)!;
-
-  const supabase = createServerClient(url, anon, {
-    cookies: {
-      getAll() {
-        return req.cookies.getAll();
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get: (name) => req.cookies.get(name)?.value,
+        set: (name, value, options: CookieOptions) => {
+          res.cookies.set({ name, value, ...options });
+        },
+        remove: (name, options: CookieOptions) => {
+          res.cookies.set({ name, value: '', ...options, maxAge: 0 });
+        },
       },
-      setAll(cookies) {
-        cookies.forEach(({ name, value, options }) => {
-          if (options?.maxAge === 0) {
-            req.cookies.delete(name);
-            res.cookies.delete(name);
-            return;
-          }
+    }
+  );
 
-          req.cookies.set(name, value);
-          res.cookies.set(name, value, options);
-        });
-      },
-    },
-  });
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  // Ensure auth cookies are set/refreshed server-side
-  await supabase.auth.getSession();
+  const path = req.nextUrl.pathname;
+
+  // ===== Admin rules =====
+  // /admin  -> public (login page)
+  // /admin/* (kecuali /admin & /admin/login) -> perlu user admin
+  if (path.startsWith('/admin') && path !== '/admin' && path !== '/admin/login') {
+    if (!user) {
+      return NextResponse.redirect(new URL('/admin', req.url));
+    }
+  }
+
+  // ===== Client rules =====
+  // /client/login & /client/register -> selalu boleh diakses (jangan auto-redirect)
+  // /client (dashboard) & /client/* selain dua di atas -> butuh user
+  const isClientLogin = path === '/client/login';
+  const isClientRegister = path === '/client/register';
+  if (path.startsWith('/client') && !isClientLogin && !isClientRegister) {
+    if (path === '/client' || path.startsWith('/client/')) {
+      if (!user) {
+        return NextResponse.redirect(new URL('/client/login', req.url));
+      }
+    }
+  }
+
   return res;
 }
 
 export const config = {
-  // Run for all app routes except static assets
   matcher: ['/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)'],
 };

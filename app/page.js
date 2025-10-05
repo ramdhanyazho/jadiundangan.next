@@ -124,7 +124,7 @@ export default function Home() {
           </nav>
           <div className="flex items-center gap-3">
             <Link
-              href="/client"
+              href="/client/login"
               className="hidden rounded-full border border-brand/50 px-4 py-2 text-sm font-semibold text-brand transition hover:bg-brand/5 md:inline-flex"
             >
               Login Akun

@@ -13,7 +13,7 @@ export default async function ClientDashboardPage() {
     } = await supabase.auth.getSession();
 
     if (!session) {
-      redirect('/login');
+      redirect('/client/login');
     }
 
     const { data: invitations, error: invitationsError } = await supabase
