@@ -108,6 +108,36 @@ export interface InvitationUpdate {
   updated_at?: string | null;
 }
 
+export interface MediaRow {
+  id: string;
+  invitation_id: string | null;
+  type: 'photo' | 'music' | 'video';
+  url: string;
+  caption: string | null;
+  sort_index: number | null;
+  created_at: string | null;
+}
+
+export interface MediaInsert {
+  id?: string;
+  invitation_id?: string | null;
+  type: 'photo' | 'music' | 'video';
+  url: string;
+  caption?: string | null;
+  sort_index?: number | null;
+  created_at?: string | null;
+}
+
+export interface MediaUpdate {
+  id?: string;
+  invitation_id?: string | null;
+  type?: 'photo' | 'music' | 'video';
+  url?: string;
+  caption?: string | null;
+  sort_index?: number | null;
+  created_at?: string | null;
+}
+
 export interface GuestRow {
   id: string;
   invitation_id: string | null;
@@ -229,6 +259,12 @@ export type Database = {
         Row: InvitationRow;
         Insert: InvitationInsert;
         Update: InvitationUpdate;
+        Relationships: [];
+      };
+      media: {
+        Row: MediaRow;
+        Insert: MediaInsert;
+        Update: MediaUpdate;
         Relationships: [];
       };
       guests: {
