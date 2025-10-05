@@ -9,7 +9,6 @@ type Props = { children: ReactNode };
 
 export default async function AdminLayout({ children }: Props) {
   const supabase = getServerClient();
-
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -21,7 +20,7 @@ export default async function AdminLayout({ children }: Props) {
     .eq('user_id', user.id)
     .maybeSingle<{ is_admin: boolean | null }>();
 
-  const isAdmin = profile?.is_admin === true;
+  const isAdmin = profile ? profile.is_admin === true : false;
   if (error || !isAdmin) redirect('/client');
 
   return (

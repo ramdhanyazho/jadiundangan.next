@@ -1,80 +1,33 @@
-import { getAdminClient } from '@/lib/supabaseAdmin';
-
 export const dynamic = 'force-dynamic';
 
-export default async function AdminDashboardPage() {
-  try {
-    const supabase = getAdminClient();
+import { getServerClient } from '@/lib/supabaseServer';
 
-    const [totalUsersResult, totalInvitationsResult, pendingPaymentsResult] = await Promise.all([
-      supabase.from('profiles').select('id', { count: 'exact', head: true }),
-      supabase.from('invitations').select('id', { count: 'exact', head: true }),
-      supabase.from('payments').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
-    ]);
+export default async function AdminHome() {
+  const supabase = getServerClient();
 
-    const totalUsers =
-      totalUsersResult.error || typeof totalUsersResult.count !== 'number'
-        ? '—'
-        : totalUsersResult.count.toString();
+  const [{ count: users }, { data: paid }, { data: unpaid }] = await Promise.all([
+    supabase.from('profiles').select('*', { count: 'exact', head: true }),
+    supabase.from('payments').select('id', { count: 'exact' }).eq('status', 'paid'),
+    supabase.from('payments').select('id', { count: 'exact' }).eq('status', 'unpaid'),
+  ]);
 
-    const totalInvitations =
-      totalInvitationsResult.error || typeof totalInvitationsResult.count !== 'number'
-        ? '—'
-        : totalInvitationsResult.count.toString();
+  const paidCount = paid?.length ?? 0;
+  const unpaidCount = unpaid?.length ?? 0;
 
-    const pendingPayments =
-      pendingPaymentsResult.error || typeof pendingPaymentsResult.count !== 'number'
-        ? '—'
-        : pendingPaymentsResult.count.toString();
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <Card title="Pengguna" value={users ?? 0} />
+      <Card title="Pembayaran Lunas" value={paidCount} />
+      <Card title="Pembayaran Belum" value={unpaidCount} />
+    </div>
+  );
+}
 
-    const cards = [
-      {
-        title: 'Total Pengguna',
-        value: totalUsers,
-        description: 'Jumlah akun yang terdaftar di platform.',
-      },
-      {
-        title: 'Total Undangan',
-        value: totalInvitations,
-        description: 'Total undangan yang dibuat oleh seluruh pengguna.',
-      },
-      {
-        title: 'Pembayaran Pending',
-        value: pendingPayments,
-        description: 'Transaksi yang masih menunggu konfirmasi.',
-      },
-    ];
-
-    return (
-      <section className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-semibold text-gray-900">Dashboard Admin</h1>
-          <p className="mt-2 text-sm text-gray-600">
-            Ringkasan aktivitas dan metrik utama platform undangan digital Anda.
-          </p>
-        </div>
-
-        <div className="grid gap-6 md:grid-cols-3">
-          {cards.map((card) => (
-            <div key={card.title} className="rounded-2xl bg-white p-6 shadow-xl">
-              <p className="text-sm font-medium text-gray-500">{card.title}</p>
-              <p className="mt-4 text-3xl font-semibold text-gray-900">{card.value}</p>
-              <p className="mt-2 text-xs text-gray-500">{card.description}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-    );
-  } catch (error) {
-    const message = error instanceof Error ? error.message : 'Konfigurasi Supabase belum lengkap.';
-
-    return (
-      <section className="space-y-4 rounded-2xl border border-dashed border-slate-200 bg-white p-6 text-sm text-slate-600">
-        <h1 className="text-xl font-semibold text-slate-900">Dashboard Admin</h1>
-        <p>Pengambilan data dashboard tidak dapat dilakukan.</p>
-        <p className="font-medium text-rose-600">{message}</p>
-        <p>Pastikan variabel lingkungan Supabase telah diatur sebelum menjalankan build produksi.</p>
-      </section>
-    );
-  }
+function Card({ title, value }: { title: string; value: number }) {
+  return (
+    <div className="rounded-xl border bg-white p-6">
+      <p className="text-sm opacity-70">{title}</p>
+      <p className="text-3xl font-bold mt-2">{value}</p>
+    </div>
+  );
 }

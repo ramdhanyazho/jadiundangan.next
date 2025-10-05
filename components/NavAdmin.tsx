@@ -5,25 +5,18 @@ import { usePathname } from 'next/navigation';
 
 import LogoutButton from '@/components/LogoutButton';
 
-type NavAdminProps = {
-  supabaseUrl: string;
-  supabaseAnon: string;
-  hasUrl: boolean;
-  hasAnon: boolean;
-};
-
 const adminNavItems = [
   { href: '/admin', label: 'Dashboard' },
-  { href: '/admin/users', label: 'Pengguna' },
-  { href: '/admin/payments', label: 'Pembayaran' },
-  { href: '/admin/themes', label: 'Tema' },
-  { href: '/admin/settings', label: 'Setting' },
+  { href: '/admin/pengguna', label: 'Pengguna' },
+  { href: '/admin/pembayaran', label: 'Pembayaran' },
+  { href: '/admin/thema', label: 'Tema' },
+  { href: '/admin/setting', label: 'Setting' },
 ];
 
 const isActive = (currentPath: string, target: string) =>
   currentPath === target || currentPath.startsWith(`${target}/`);
 
-export default function NavAdmin({ supabaseUrl, supabaseAnon, hasUrl, hasAnon }: NavAdminProps) {
+export default function NavAdmin() {
   const pathname = usePathname();
 
   return (
@@ -42,12 +35,7 @@ export default function NavAdmin({ supabaseUrl, supabaseAnon, hasUrl, hasAnon }:
             </Link>
           ))}
         </nav>
-        <LogoutButton
-          supabaseUrl={supabaseUrl}
-          supabaseAnon={supabaseAnon}
-          hasUrl={hasUrl}
-          hasAnon={hasAnon}
-        />
+        <LogoutButton />
       </div>
     </header>
   );

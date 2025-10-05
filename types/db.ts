@@ -90,17 +90,77 @@ export interface VisitLogUpdate {
 
 export interface PaymentRow {
   id: string;
-  status: string | null;
+  user_id: string;
+  amount: string;
+  status: 'unpaid' | 'paid';
+  invoice_no: string | null;
+  created_at: string | null;
 }
 
 export interface PaymentInsert {
   id?: string;
-  status?: string | null;
+  user_id: string;
+  amount?: string;
+  status?: 'unpaid' | 'paid';
+  invoice_no?: string | null;
+  created_at?: string | null;
 }
 
 export interface PaymentUpdate {
   id?: string;
-  status?: string | null;
+  user_id?: string;
+  amount?: string;
+  status?: 'unpaid' | 'paid';
+  invoice_no?: string | null;
+  created_at?: string | null;
+}
+
+export interface ThemeRow {
+  id: string;
+  slug: string;
+  name: string;
+  status: 'active' | 'inactive';
+  preview_url: string | null;
+  package_path: string | null;
+  created_at: string | null;
+}
+
+export interface ThemeInsert {
+  id?: string;
+  slug: string;
+  name: string;
+  status?: 'active' | 'inactive';
+  preview_url?: string | null;
+  package_path?: string | null;
+  created_at?: string | null;
+}
+
+export interface ThemeUpdate {
+  id?: string;
+  slug?: string;
+  name?: string;
+  status?: 'active' | 'inactive';
+  preview_url?: string | null;
+  package_path?: string | null;
+  created_at?: string | null;
+}
+
+export interface SettingRow {
+  key: string;
+  value: Record<string, unknown>;
+  updated_at: string | null;
+}
+
+export interface SettingInsert {
+  key: string;
+  value: Record<string, unknown>;
+  updated_at?: string | null;
+}
+
+export interface SettingUpdate {
+  key?: string;
+  value?: Record<string, unknown>;
+  updated_at?: string | null;
 }
 
 export type Database = {
@@ -134,6 +194,18 @@ export type Database = {
         Row: PaymentRow;
         Insert: PaymentInsert;
         Update: PaymentUpdate;
+        Relationships: [];
+      };
+      themes: {
+        Row: ThemeRow;
+        Insert: ThemeInsert;
+        Update: ThemeUpdate;
+        Relationships: [];
+      };
+      settings: {
+        Row: SettingRow;
+        Insert: SettingInsert;
+        Update: SettingUpdate;
         Relationships: [];
       };
     };
