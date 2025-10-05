@@ -21,7 +21,7 @@ export default function ContactPage() {
       setMsg('Harus login.');
       return;
     }
-    const { error } = await sb.from('contact_messages').insert({
+    const { error } = await (sb.from('contact_messages') as any).insert({
       user_id: user.id,
       invitation_id: inv?.id || null,
       subject,

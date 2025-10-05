@@ -28,8 +28,8 @@ export default function TestimonialsPage() {
 
   async function load() {
     if (!inv) return;
-    const { data } = await sb
-      .from('testimonials')
+    const { data } = await (sb
+      .from('testimonials') as any)
       .select('id,author,body,rating,created_at')
       .eq('invitation_id', inv.id)
       .order('created_at', { ascending: false });
@@ -44,18 +44,18 @@ export default function TestimonialsPage() {
   async function add(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!inv) return;
-    await sb.from('testimonials').insert({ ...form, invitation_id: inv.id });
+    await (sb.from('testimonials') as any).insert({ ...form, invitation_id: inv.id });
     setForm({ ...defaultForm });
     load();
   }
 
   async function updateRow(id: string, patch: Partial<TestimonialRow>) {
-    await sb.from('testimonials').update(patch).eq('id', id);
+    await (sb.from('testimonials') as any).update(patch).eq('id', id);
     load();
   }
 
   async function removeRow(id: string) {
-    await sb.from('testimonials').delete().eq('id', id);
+    await (sb.from('testimonials') as any).delete().eq('id', id);
     load();
   }
 

@@ -4,11 +4,14 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 
 import type { Database } from '@/types/db';
 
+const fallbackUrl = 'https://placeholder.supabase.co';
+const fallbackAnonKey = 'public-anon-key';
+
 export function getServerClient(): SupabaseClient<Database> {
   const cookieStore = cookies();
-  return createServerClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+  return createServerClient<Database, 'public'>(
+    process.env.NEXT_PUBLIC_SUPABASE_URL || fallbackUrl,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || fallbackAnonKey,
     {
       cookies: {
         get: (name) => cookieStore.get(name)?.value,

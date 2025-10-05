@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { del } from '@vercel/blob';
 
 import { getServerClient } from '@/lib/supabaseServer';
+import type { Database } from '@/types/db';
 
 export const runtime = 'edge';
 
@@ -25,13 +26,19 @@ export async function POST(req: NextRequest) {
     .eq('id', media_id)
     .maybeSingle();
 
-  const ownerId = (row as unknown as { invitations?: { user_id?: string } } | null)?.invitations?.user_id;
-  if (!row || ownerId !== user.id) {
+  const mediaRow = row as (Database['public']['Tables']['media']['Row'] & {
+    invitations?: { user_id?: string | null } | null;
+  }) | null;
+
+  const ownerId = mediaRow?.invitations?.user_id;
+  if (!mediaRow || ownerId !== user.id) {
     return new NextResponse('Forbidden', { status: 403 });
   }
 
   try {
-    await del(row.url, { token: process.env.BLOB_READ_WRITE_TOKEN });
+    if (mediaRow.url) {
+      await del(mediaRow.url, { token: process.env.BLOB_READ_WRITE_TOKEN });
+    }
   } catch (error) {
     console.warn('[blob/delete] failed to delete blob', error);
   }

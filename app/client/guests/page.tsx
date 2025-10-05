@@ -32,8 +32,8 @@ export default function GuestsPage() {
   async function load() {
     if (!inv) return;
     setLoading(true);
-    const { data } = await sb
-      .from('guests')
+    const { data } = await (sb
+      .from('guests') as any)
       .select('id,name,status,message,seats,created_at')
       .eq('invitation_id', inv.id)
       .order('created_at', { ascending: false });
@@ -49,7 +49,7 @@ export default function GuestsPage() {
   async function addGuest(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!inv) return;
-    const { error } = await sb.from('guests').insert({ ...form, invitation_id: inv.id });
+    const { error } = await (sb.from('guests') as any).insert({ ...form, invitation_id: inv.id });
     if (!error) {
       setForm({ ...defaultForm });
       load();
@@ -57,12 +57,12 @@ export default function GuestsPage() {
   }
 
   async function updateRow(id: string, patch: Partial<GuestRow>) {
-    await sb.from('guests').update(patch).eq('id', id);
+    await (sb.from('guests') as any).update(patch).eq('id', id);
     load();
   }
 
   async function removeRow(id: string) {
-    await sb.from('guests').delete().eq('id', id);
+    await (sb.from('guests') as any).delete().eq('id', id);
     load();
   }
 
