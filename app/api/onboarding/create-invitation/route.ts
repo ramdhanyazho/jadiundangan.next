@@ -1,4 +1,6 @@
 import { getServerClient } from '@/lib/supabaseServer';
+import type { Database } from '@/types/db';
+import type { SupabaseClient } from '@supabase/supabase-js';
 
 export async function POST(req: Request) {
   const supabase = getServerClient();
@@ -18,7 +20,7 @@ export async function POST(req: Request) {
     .replace(/(^-|-$)/g, '');
   const slug = base || `undangan-${Date.now()}`;
 
-  const { error } = await supabase.from('invitations').insert({
+  const payload: Database['public']['Tables']['invitations']['Insert'] = {
     slug,
     title: `The Wedding of ${groom_name} & ${bride_name}`,
     groom_name,
@@ -38,7 +40,13 @@ export async function POST(req: Request) {
       prokes: false,
       gift: true,
     },
-  });
+  };
+
+  const typedSupabase = supabase as SupabaseClient<Database>;
+  const { error } = await typedSupabase
+    .from('invitations')
+    // Supabase client typing fails to infer our table schema, so cast is required.
+    .insert(payload as never);
 
   if (error) return new Response(error.message, { status: 400 });
 
