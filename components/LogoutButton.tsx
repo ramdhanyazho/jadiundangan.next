@@ -3,7 +3,7 @@
 import { usePathname, useRouter } from 'next/navigation';
 import { useState } from 'react';
 
-import { supabaseBrowser } from '@/lib/supabaseBrowser';
+import { sb } from '@/lib/supabaseBrowser';
 
 export default function LogoutButton() {
   const router = useRouter();
@@ -12,7 +12,7 @@ export default function LogoutButton() {
 
   const onClick = async () => {
     setLoading(true);
-    await supabaseBrowser.auth.signOut();
+    await sb.auth.signOut();
 
     try {
       await fetch('/auth/callback', {
