@@ -101,7 +101,7 @@ export default function LoginClient({ supabaseUrl, supabaseAnon, hasUrl, hasAnon
 
       const params = new URLSearchParams(window.location.search);
       const back = params.get('redirectedFrom');
-      const target = back || (isAdmin ? '/admin' : '/client');
+      const target = back || (isAdmin ? '/admin/dashboard' : '/client');
 
       router.replace(target);
       router.refresh();

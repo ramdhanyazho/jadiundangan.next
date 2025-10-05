@@ -15,7 +15,7 @@ export default async function ClientLayout({ children }: Props) {
     } = await supabase.auth.getUser();
 
     if (!user) {
-      redirect('/login');
+      redirect('/client/login');
     }
 
     return (

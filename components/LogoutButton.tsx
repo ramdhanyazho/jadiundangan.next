@@ -1,35 +1,38 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
-import { createBrowserClient } from '@supabase/ssr';
+import { usePathname, useRouter } from 'next/navigation';
 import { useState } from 'react';
 
-export default function LogoutButton() {
-  const r = useRouter();
-  const [loading, setLoading] = useState(false);
+import { supabaseBrowser } from '@/lib/supabaseBrowser';
 
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-  const supabaseAnon = (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY)!;
+export default function LogoutButton() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const [loading, setLoading] = useState(false);
 
   const onClick = async () => {
     setLoading(true);
-    const supabase = createBrowserClient(supabaseUrl, supabaseAnon);
-    await supabase.auth.signOut();
+    await supabaseBrowser.auth.signOut();
 
-    await fetch('/auth/callback', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ event: 'SIGNED_OUT' }),
-    });
+    try {
+      await fetch('/auth/callback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ event: 'SIGNED_OUT' }),
+      });
+    } catch (error) {
+      console.error(error);
+    }
 
-    r.replace('/login');
+    const target = pathname.startsWith('/admin') ? '/admin' : '/client/login';
+    router.replace(target);
   };
 
   return (
     <button
       onClick={onClick}
       disabled={loading}
-      className="px-3 py-2 rounded-md text-sm font-medium bg-slate-100 hover:bg-slate-200"
+      className="rounded-md bg-slate-100 px-3 py-2 text-sm font-medium hover:bg-slate-200"
     >
       {loading ? 'Keluar…' : 'Logout'}
     </button>
