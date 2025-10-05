@@ -1,4 +1,5 @@
 import type { NextRequest } from 'next/server';
+import type { User } from '@supabase/supabase-js';
 import { getAdminClient } from '@/lib/supabaseAdmin';
 
 // Helper: cari userId dari email
@@ -6,7 +7,10 @@ async function findUserIdByEmail(email: string) {
   const admin = getAdminClient();
   const { data, error } = await admin.auth.admin.listUsers({ page: 1, perPage: 1000 });
   if (error) throw error;
-  return data.users.find(u => (u.email || '').toLowerCase() === email.toLowerCase())?.id ?? null;
+  const users = (data?.users ?? []) as User[];
+  return (
+    users.find(user => (user.email ?? '').toLowerCase() === email.toLowerCase())?.id ?? null
+  );
 }
 
 export async function GET() {

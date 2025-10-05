@@ -1,3 +1,11 @@
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[];
+
 export interface ProfileRow {
   id: string;
   user_id: string;
@@ -33,26 +41,71 @@ export interface ProfileUpdate {
 
 export interface InvitationRow {
   id: string;
+  slug: string;
+  title: string | null;
+  groom_name: string;
+  bride_name: string;
+  groom_nickname: string | null;
+  bride_nickname: string | null;
+  groom_parents: string | null;
+  bride_parents: string | null;
+  date_display: string | null;
+  theme_slug: string | null;
+  cover_photo_url: string | null;
+  music_url: string | null;
   user_id: string | null;
+  custom_domain_suffix: string | null;
   view_count: number | null;
   is_published: boolean | null;
+  pages_enabled: Json | null;
   created_at: string | null;
+  updated_at: string | null;
 }
 
 export interface InvitationInsert {
   id?: string;
+  slug: string;
+  title?: string | null;
+  groom_name: string;
+  bride_name: string;
+  groom_nickname?: string | null;
+  bride_nickname?: string | null;
+  groom_parents?: string | null;
+  bride_parents?: string | null;
+  date_display?: string | null;
+  theme_slug?: string | null;
+  cover_photo_url?: string | null;
+  music_url?: string | null;
   user_id?: string | null;
+  custom_domain_suffix?: string | null;
   view_count?: number | null;
   is_published?: boolean | null;
+  pages_enabled?: Json | null;
   created_at?: string | null;
+  updated_at?: string | null;
 }
 
 export interface InvitationUpdate {
   id?: string;
+  slug?: string;
+  title?: string | null;
+  groom_name?: string;
+  bride_name?: string;
+  groom_nickname?: string | null;
+  bride_nickname?: string | null;
+  groom_parents?: string | null;
+  bride_parents?: string | null;
+  date_display?: string | null;
+  theme_slug?: string | null;
+  cover_photo_url?: string | null;
+  music_url?: string | null;
   user_id?: string | null;
+  custom_domain_suffix?: string | null;
   view_count?: number | null;
   is_published?: boolean | null;
+  pages_enabled?: Json | null;
   created_at?: string | null;
+  updated_at?: string | null;
 }
 
 export interface GuestRow {
@@ -147,19 +200,19 @@ export interface ThemeUpdate {
 
 export interface SettingRow {
   key: string;
-  value: Record<string, unknown>;
+  value: Json;
   updated_at: string | null;
 }
 
 export interface SettingInsert {
   key: string;
-  value: Record<string, unknown>;
+  value: Json;
   updated_at?: string | null;
 }
 
 export interface SettingUpdate {
   key?: string;
-  value?: Record<string, unknown>;
+  value?: Json;
   updated_at?: string | null;
 }
 
