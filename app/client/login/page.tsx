@@ -1,11 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 import { supabaseBrowser } from '@/lib/supabaseBrowser';
 
-export default function ClientLogin() {
+function ClientLoginContent() {
   const [err, setErr] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -49,5 +49,21 @@ export default function ClientLogin() {
         </button>
       </form>
     </div>
+  );
+}
+
+export default function ClientLogin() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen grid place-items-center p-6">
+          <div className="w-full max-w-md rounded-xl bg-white p-6 shadow">
+            <p className="text-center text-sm text-slate-500">Memuat formulir…</p>
+          </div>
+        </div>
+      }
+    >
+      <ClientLoginContent />
+    </Suspense>
   );
 }
