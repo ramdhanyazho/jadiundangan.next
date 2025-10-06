@@ -10,3 +10,7 @@ export const supabaseAdmin = createClient(
     },
   }
 );
+
+export function getAdminClient() {
+  return supabaseAdmin;
+}
