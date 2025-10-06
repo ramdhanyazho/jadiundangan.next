@@ -141,34 +141,55 @@ export interface MediaUpdate {
 export interface GuestRow {
   id: string;
   invitation_id: string | null;
+  name: string;
+  status: 'yes' | 'no' | 'pending' | null;
   message: string | null;
+  seats: number | null;
+  created_at: string | null;
 }
 
 export interface GuestInsert {
   id?: string;
   invitation_id?: string | null;
+  name: string;
+  status?: 'yes' | 'no' | 'pending' | null;
   message?: string | null;
+  seats?: number | null;
+  created_at?: string | null;
 }
 
 export interface GuestUpdate {
   id?: string;
   invitation_id?: string | null;
+  name?: string;
+  status?: 'yes' | 'no' | 'pending' | null;
   message?: string | null;
+  seats?: number | null;
+  created_at?: string | null;
 }
 
 export interface VisitLogRow {
   id: string;
   invitation_id: string | null;
+  ip: string | null;
+  ua: string | null;
+  created_at: string | null;
 }
 
 export interface VisitLogInsert {
   id?: string;
   invitation_id?: string | null;
+  ip?: string | null;
+  ua?: string | null;
+  created_at?: string | null;
 }
 
 export interface VisitLogUpdate {
   id?: string;
   invitation_id?: string | null;
+  ip?: string | null;
+  ua?: string | null;
+  created_at?: string | null;
 }
 
 export interface PaymentRow {
@@ -195,6 +216,144 @@ export interface PaymentUpdate {
   amount?: string;
   status?: 'unpaid' | 'paid';
   invoice_no?: string | null;
+  created_at?: string | null;
+}
+
+export interface EventRow {
+  id: string;
+  invitation_id: string | null;
+  type: 'akad' | 'resepsi' | 'custom' | null;
+  title: string | null;
+  date: string | null;
+  time: string | null;
+  date_display: string | null;
+  location: string | null;
+  map_url: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  note: string | null;
+  created_at: string | null;
+}
+
+export interface EventInsert {
+  id?: string;
+  invitation_id?: string | null;
+  type?: 'akad' | 'resepsi' | 'custom' | null;
+  title?: string | null;
+  date?: string | null;
+  time?: string | null;
+  date_display?: string | null;
+  location?: string | null;
+  map_url?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  note?: string | null;
+  created_at?: string | null;
+}
+
+export interface EventUpdate {
+  id?: string;
+  invitation_id?: string | null;
+  type?: 'akad' | 'resepsi' | 'custom' | null;
+  title?: string | null;
+  date?: string | null;
+  time?: string | null;
+  date_display?: string | null;
+  location?: string | null;
+  map_url?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  note?: string | null;
+  created_at?: string | null;
+}
+
+export interface GiftRow {
+  id: string;
+  invitation_id: string | null;
+  bank_name: string | null;
+  account_number: string | null;
+  account_name: string | null;
+  qr_image_url: string | null;
+}
+
+export interface GiftInsert {
+  id?: string;
+  invitation_id?: string | null;
+  bank_name?: string | null;
+  account_number?: string | null;
+  account_name?: string | null;
+  qr_image_url?: string | null;
+}
+
+export interface GiftUpdate {
+  id?: string;
+  invitation_id?: string | null;
+  bank_name?: string | null;
+  account_number?: string | null;
+  account_name?: string | null;
+  qr_image_url?: string | null;
+}
+
+export interface StoryRow {
+  id: string;
+  invitation_id: string | null;
+  title: string | null;
+  body: string | null;
+  date: string | null;
+  date_display: string | null;
+  photo_url: string | null;
+  sort_index: number | null;
+  created_at: string | null;
+}
+
+export interface StoryInsert {
+  id?: string;
+  invitation_id?: string | null;
+  title?: string | null;
+  body?: string | null;
+  date?: string | null;
+  date_display?: string | null;
+  photo_url?: string | null;
+  sort_index?: number | null;
+  created_at?: string | null;
+}
+
+export interface StoryUpdate {
+  id?: string;
+  invitation_id?: string | null;
+  title?: string | null;
+  body?: string | null;
+  date?: string | null;
+  date_display?: string | null;
+  photo_url?: string | null;
+  sort_index?: number | null;
+  created_at?: string | null;
+}
+
+export interface TestimonialRow {
+  id: string;
+  invitation_id: string | null;
+  author: string | null;
+  body: string | null;
+  rating: number | null;
+  created_at: string | null;
+}
+
+export interface TestimonialInsert {
+  id?: string;
+  invitation_id?: string | null;
+  author?: string | null;
+  body?: string | null;
+  rating?: number | null;
+  created_at?: string | null;
+}
+
+export interface TestimonialUpdate {
+  id?: string;
+  invitation_id?: string | null;
+  author?: string | null;
+  body?: string | null;
+  rating?: number | null;
   created_at?: string | null;
 }
 
@@ -261,6 +420,12 @@ export type Database = {
         Update: InvitationUpdate;
         Relationships: [];
       };
+      events: {
+        Row: EventRow;
+        Insert: EventInsert;
+        Update: EventUpdate;
+        Relationships: [];
+      };
       media: {
         Row: MediaRow;
         Insert: MediaInsert;
@@ -271,6 +436,24 @@ export type Database = {
         Row: GuestRow;
         Insert: GuestInsert;
         Update: GuestUpdate;
+        Relationships: [];
+      };
+      gifts: {
+        Row: GiftRow;
+        Insert: GiftInsert;
+        Update: GiftUpdate;
+        Relationships: [];
+      };
+      stories: {
+        Row: StoryRow;
+        Insert: StoryInsert;
+        Update: StoryUpdate;
+        Relationships: [];
+      };
+      testimonials: {
+        Row: TestimonialRow;
+        Insert: TestimonialInsert;
+        Update: TestimonialUpdate;
         Relationships: [];
       };
       visit_logs: {

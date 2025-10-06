@@ -1,18 +1,30 @@
 import { requireAdmin } from '@/lib/adminGuard';
+import { getAdminClient } from '@/lib/supabaseAdmin';
 import { NextRequest } from 'next/server';
+import type { Database } from '@/types/db';
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
-  const { admin } = await requireAdmin();
-  const { data } = await admin
-    .from('themes')
+  await requireAdmin();
+  const admin = getAdminClient();
+  const themesTable = 'themes' satisfies keyof Database['public']['Tables'];
+  const themesQuery = admin.from(themesTable) as any;
+  const { data, error } = await themesQuery
     .select('id, slug, name, status, preview_url, package_path, created_at')
     .order('created_at', { ascending: false });
+
+  if (error) {
+    return new Response(error.message, { status: 400 });
+  }
+
   return Response.json({ items: data ?? [] });
 }
 
 export async function POST(req: NextRequest) {
-  const { admin } = await requireAdmin();
+  await requireAdmin();
+  const admin = getAdminClient();
+  const themesTable = 'themes' satisfies keyof Database['public']['Tables'];
+  const themesQuery = admin.from(themesTable) as any;
   const form = await req.formData();
   const file = form.get('file') as File | null;
   const slug = String(form.get('slug') || '');
@@ -32,13 +44,15 @@ export async function POST(req: NextRequest) {
 
   admin.storage.from('themes').getPublicUrl(objectPath);
 
-  const { error: insErr } = await admin.from('themes').insert({
+  const payload = {
     slug,
     name,
-    status: 'inactive',
+    status: 'inactive' as const,
     preview_url: null,
     package_path: put?.path ?? objectPath,
-  });
+  } satisfies Database['public']['Tables']['themes']['Insert'];
+
+  const { error: insErr } = await themesQuery.insert(payload);
   if (insErr) return new Response(insErr.message, { status: 400 });
 
   return new Response(null, { status: 201 });

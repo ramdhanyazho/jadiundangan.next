@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { upsertProfileWithRetry } from '@/lib/upsertProfileWithRetry';
+import type { Database } from '@/types/db';
 
 type Payload = {
   account: { email: string; password: string; full_name?: string };
@@ -97,34 +98,36 @@ export async function POST(req: Request) {
   }
 
   const now = new Date().toISOString();
-  const { data: invRow, error: invErr } = await supabaseAdmin
-    .from('invitations')
-    .insert({
-      user_id,
-      slug: baseSlug,
-      title: inv.title || `The Wedding of ${inv.groom_name} & ${inv.bride_name}`,
-      groom_name: inv.groom_name,
-      bride_name: inv.bride_name,
-      theme_slug: theme.slug,
-      date_display: inv.date_display || null,
-      music_url: null,
-      cover_photo_url: null,
-      pages_enabled: {
-        cover: true,
-        couple: true,
-        event: true,
-        wishes: true,
-        gallery: true,
-        story: true,
-        location: true,
-        qrcode: true,
-        prokes: false,
-        gift: true,
-      },
-      is_published: false,
-      created_at: now,
-      updated_at: now,
-    })
+  const invitationPayload = {
+    user_id,
+    slug: baseSlug,
+    title: inv.title || `The Wedding of ${inv.groom_name} & ${inv.bride_name}`,
+    groom_name: inv.groom_name,
+    bride_name: inv.bride_name,
+    theme_slug: inv.theme_slug,
+    date_display: inv.date_display || null,
+    music_url: null,
+    cover_photo_url: null,
+    pages_enabled: {
+      cover: true,
+      couple: true,
+      event: true,
+      wishes: true,
+      gallery: true,
+      story: true,
+      location: true,
+      qrcode: true,
+      prokes: false,
+      gift: true,
+    },
+    is_published: false,
+    created_at: now,
+    updated_at: now,
+  } satisfies Database['public']['Tables']['invitations']['Insert'];
+
+  const invitationsQuery = supabaseAdmin.from('invitations') as any;
+  const { data: invRow, error: invErr } = await invitationsQuery
+    .insert(invitationPayload)
     .select('id')
     .maybeSingle();
 
@@ -148,9 +151,10 @@ export async function POST(req: Request) {
         date_display: inv.date_display || null,
         location: inv.location || null,
       },
-    ];
+    ] satisfies Database['public']['Tables']['events']['Insert'][];
 
-    const { error: eventErr } = await supabaseAdmin.from('events').insert(eventsPayload);
+    const eventsQuery = supabaseAdmin.from('events') as any;
+    const { error: eventErr } = await eventsQuery.insert(eventsPayload);
 
     if (eventErr) {
       return new NextResponse(eventErr.message, { status: 400 });

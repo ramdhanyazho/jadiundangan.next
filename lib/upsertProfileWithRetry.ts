@@ -10,7 +10,7 @@ type ProfileInsert = Database['public']['Tables']['profiles']['Insert'];
  * Attempts to upsert a profile row, retrying when the auth.users FK has not yet replicated.
  */
 export async function upsertProfileWithRetry(
-  client: SupabaseClient<Database>,
+  client: SupabaseClient<Database, 'public'>,
   payload: ProfileInsert,
   {
     retries = 5,
@@ -22,9 +22,8 @@ export async function upsertProfileWithRetry(
   let lastError: { message: string; code?: string } | null = null;
 
   while (attempt <= retries) {
-    const { error } = await client
-      .from('profiles')
-      .upsert(payload, { onConflict: 'user_id' });
+    const profilesQuery = client.from('profiles') as any;
+    const { error } = await profilesQuery.upsert(payload, { onConflict: 'user_id' });
 
     if (!error) {
       return { error: null } as const;

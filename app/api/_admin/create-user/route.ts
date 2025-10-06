@@ -1,6 +1,10 @@
 /* eslint-disable */
 import crypto from 'crypto';
+
 import { getAdminClient } from '@/lib/supabaseAdmin';
+import { upsertProfileWithRetry } from '@/lib/upsertProfileWithRetry';
+import type { SupabaseClient } from '@supabase/supabase-js';
+import type { Database } from '@/types/db';
 export const dynamic = 'force-dynamic';
 
 function safeEq(a?: string | null, b?: string | null) {
@@ -27,7 +31,7 @@ export async function POST(req: Request) {
       return new Response('Missing email or password', { status: 400 });
     }
 
-    const admin = getAdminClient();
+    const admin: SupabaseClient<Database, 'public'> = getAdminClient();
     const { data, error } = await admin.auth.admin.createUser({
       email,
       password,
@@ -37,12 +41,16 @@ export async function POST(req: Request) {
 
     const user = data.user!;
     // Upsert profile
-    const { error: upErr } = await admin
-      .from('profiles')
-      .upsert(
-        { user_id: user.id, email, is_admin, role: is_admin ? 'admin' : 'client' },
-        { onConflict: 'user_id' }
-      );
+    const profilePayload = {
+      user_id: user.id,
+      email,
+      is_admin,
+      role: is_admin ? 'admin' : 'client',
+    } satisfies Database['public']['Tables']['profiles']['Insert'];
+
+    const { error: upErr } = await upsertProfileWithRetry(admin, profilePayload, {
+      retries: 0,
+    });
     if (upErr) return new Response(upErr.message, { status: 400 });
 
     return Response.json({ ok: true, user_id: user.id, email, is_admin }, { status: 201 });

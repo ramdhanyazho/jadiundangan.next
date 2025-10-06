@@ -1,10 +1,13 @@
 import type { NextRequest } from 'next/server';
-import type { User } from '@supabase/supabase-js';
+import type { SupabaseClient, User } from '@supabase/supabase-js';
+
 import { getAdminClient } from '@/lib/supabaseAdmin';
+import { upsertProfileWithRetry } from '@/lib/upsertProfileWithRetry';
+import type { Database } from '@/types/db';
 
 // Helper: cari userId dari email
 async function findUserIdByEmail(email: string) {
-  const admin = getAdminClient();
+  const admin: SupabaseClient<Database, 'public'> = getAdminClient();
   const { data, error } = await admin.auth.admin.listUsers({ page: 1, perPage: 1000 });
   if (error) throw error;
   const users = (data?.users ?? []) as User[];
@@ -38,7 +41,7 @@ export async function POST(req: NextRequest) {
   const is_admin = Boolean(body?.is_admin);
   if (!email || !password) return new Response('Missing "email" or "password"', { status: 400 });
 
-  const admin = getAdminClient();
+  const admin: SupabaseClient<Database, 'public'> = getAdminClient();
 
   // 1) Coba create user
   let userId: string | null = null;
@@ -61,13 +64,27 @@ export async function POST(req: NextRequest) {
   if (!userId) return new Response('No user id obtained', { status: 500 });
 
   // 2) Upsert profile (kunci perbaikan!)
-  const up = await admin
+  const profilePayload = {
+    user_id: userId,
+    email,
+    is_admin,
+  } satisfies Database['public']['Tables']['profiles']['Insert'];
+
+  const { error: upErr } = await upsertProfileWithRetry(admin, profilePayload, { retries: 0 });
+
+  if (upErr) {
+    return new Response(`profiles upsert error: ${upErr.message}`, { status: 400 });
+  }
+
+  const { data: profile, error: profileErr } = await admin
     .from('profiles')
-    .upsert({ user_id: userId, email, is_admin }, { onConflict: 'user_id' })
     .select('user_id, email, is_admin')
+    .eq('user_id', userId)
     .maybeSingle();
 
-  if (up.error) return new Response(`profiles upsert error: ${up.error.message}`, { status: 400 });
+  if (profileErr) {
+    return new Response(`profiles fetch error: ${profileErr.message}`, { status: 400 });
+  }
 
-  return Response.json({ ok: true, user_id: userId, profile: up.data }, { status: 200 });
+  return Response.json({ ok: true, user_id: userId, profile }, { status: 200 });
 }
