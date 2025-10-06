@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 
 import { getServerClient } from '@/lib/supabaseServer';
+import type { Database } from '@/types/db';
 
 const rateLimitStore = new Map<string, number>();
 const RATE_LIMIT_WINDOW = 60 * 1000;
@@ -61,7 +62,7 @@ export async function POST(request: Request) {
       name,
       message,
       status: 'pending',
-    });
+    } satisfies Database['public']['Tables']['guests']['Insert']);
 
     if (error) {
       return new NextResponse(error.message, { status: 400 });
