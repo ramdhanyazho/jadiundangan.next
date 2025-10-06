@@ -19,7 +19,7 @@ export async function POST(req: Request) {
     .replace(/(^-|-$)/g, '');
   const slug = base || `undangan-${Date.now()}`;
 
-  const payload = {
+  const payload: Database['public']['Tables']['invitations']['Insert'] = {
     slug,
     title: `The Wedding of ${groom_name} & ${bride_name}`,
     groom_name,

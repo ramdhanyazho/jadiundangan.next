@@ -6,6 +6,27 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[];
 
+type SupabaseRelationship = {
+  foreignKeyName: string;
+  columns: string[];
+  referencedRelation: string;
+  referencedColumns: string[];
+  isOneToOne?: boolean;
+};
+
+type SupabaseTable = {
+  Row: Record<string, unknown>;
+  Insert: Record<string, unknown>;
+  Update: Record<string, unknown>;
+  Relationships: SupabaseRelationship[];
+};
+
+type SupabaseSchema = {
+  Tables: Record<string, SupabaseTable>;
+  Views: Record<string, { Row: Record<string, unknown>; Relationships: SupabaseRelationship[] }>;
+  Functions: Record<string, { Args: Record<string, unknown>; Returns: unknown }>;
+};
+
 export interface ProfileRow {
   id: string;
   user_id: string;
@@ -405,87 +426,91 @@ export interface SettingUpdate {
   updated_at?: string | null;
 }
 
-export type Database = {
-  public: {
-    Tables: {
-      profiles: {
-        Row: ProfileRow;
-        Insert: ProfileInsert;
-        Update: ProfileUpdate;
-        Relationships: [];
-      };
-      invitations: {
-        Row: InvitationRow;
-        Insert: InvitationInsert;
-        Update: InvitationUpdate;
-        Relationships: [];
-      };
-      events: {
-        Row: EventRow;
-        Insert: EventInsert;
-        Update: EventUpdate;
-        Relationships: [];
-      };
-      media: {
-        Row: MediaRow;
-        Insert: MediaInsert;
-        Update: MediaUpdate;
-        Relationships: [];
-      };
-      guests: {
-        Row: GuestRow;
-        Insert: GuestInsert;
-        Update: GuestUpdate;
-        Relationships: [];
-      };
-      gifts: {
-        Row: GiftRow;
-        Insert: GiftInsert;
-        Update: GiftUpdate;
-        Relationships: [];
-      };
-      stories: {
-        Row: StoryRow;
-        Insert: StoryInsert;
-        Update: StoryUpdate;
-        Relationships: [];
-      };
-      testimonials: {
-        Row: TestimonialRow;
-        Insert: TestimonialInsert;
-        Update: TestimonialUpdate;
-        Relationships: [];
-      };
-      visit_logs: {
-        Row: VisitLogRow;
-        Insert: VisitLogInsert;
-        Update: VisitLogUpdate;
-        Relationships: [];
-      };
-      payments: {
-        Row: PaymentRow;
-        Insert: PaymentInsert;
-        Update: PaymentUpdate;
-        Relationships: [];
-      };
-      themes: {
-        Row: ThemeRow;
-        Insert: ThemeInsert;
-        Update: ThemeUpdate;
-        Relationships: [];
-      };
-      settings: {
-        Row: SettingRow;
-        Insert: SettingInsert;
-        Update: SettingUpdate;
-        Relationships: [];
-      };
-    };
-    Views: Record<string, never>;
-    Functions: Record<string, never>;
-    Enums: Record<string, never>;
-    CompositeTypes: Record<string, never>;
+type PublicTables = {
+  profiles: {
+    Row: ProfileRow;
+    Insert: ProfileInsert;
+    Update: ProfileUpdate;
+    Relationships: SupabaseRelationship[];
   };
+  invitations: {
+    Row: InvitationRow;
+    Insert: InvitationInsert;
+    Update: InvitationUpdate;
+    Relationships: SupabaseRelationship[];
+  };
+  events: {
+    Row: EventRow;
+    Insert: EventInsert;
+    Update: EventUpdate;
+    Relationships: SupabaseRelationship[];
+  };
+  media: {
+    Row: MediaRow;
+    Insert: MediaInsert;
+    Update: MediaUpdate;
+    Relationships: SupabaseRelationship[];
+  };
+  guests: {
+    Row: GuestRow;
+    Insert: GuestInsert;
+    Update: GuestUpdate;
+    Relationships: SupabaseRelationship[];
+  };
+  gifts: {
+    Row: GiftRow;
+    Insert: GiftInsert;
+    Update: GiftUpdate;
+    Relationships: SupabaseRelationship[];
+  };
+  stories: {
+    Row: StoryRow;
+    Insert: StoryInsert;
+    Update: StoryUpdate;
+    Relationships: SupabaseRelationship[];
+  };
+  testimonials: {
+    Row: TestimonialRow;
+    Insert: TestimonialInsert;
+    Update: TestimonialUpdate;
+    Relationships: SupabaseRelationship[];
+  };
+  visit_logs: {
+    Row: VisitLogRow;
+    Insert: VisitLogInsert;
+    Update: VisitLogUpdate;
+    Relationships: SupabaseRelationship[];
+  };
+  payments: {
+    Row: PaymentRow;
+    Insert: PaymentInsert;
+    Update: PaymentUpdate;
+    Relationships: SupabaseRelationship[];
+  };
+  themes: {
+    Row: ThemeRow;
+    Insert: ThemeInsert;
+    Update: ThemeUpdate;
+    Relationships: SupabaseRelationship[];
+  };
+  settings: {
+    Row: SettingRow;
+    Insert: SettingInsert;
+    Update: SettingUpdate;
+    Relationships: SupabaseRelationship[];
+  };
+};
+
+type PublicSchema = SupabaseSchema & {
+  Tables: PublicTables;
+  Views: Record<string, never>;
+  Functions: Record<string, never>;
+  Enums: Record<string, never>;
+  CompositeTypes: Record<string, never>;
+};
+
+export type Database = {
+  public: PublicSchema;
 };
 
 export type Profile = Database['public']['Tables']['profiles']['Row'];

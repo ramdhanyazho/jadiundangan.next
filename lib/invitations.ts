@@ -15,7 +15,11 @@ export type InvitationView = {
 export async function getInvitationView(slug: string): Promise<InvitationView | null> {
   const client = getServerClient();
 
-  const { data: invitation, error } = await client.from('invitations').select('*').eq('slug', slug).maybeSingle();
+  const { data: invitation, error } = await client
+    .from('invitations')
+    .select<'*', InvitationRow>()
+    .eq('slug', slug)
+    .maybeSingle();
 
   if (error) {
     console.error('Failed to load invitation', error);
@@ -27,21 +31,29 @@ export async function getInvitationView(slug: string): Promise<InvitationView | 
   }
 
   const [{ data: events }, { data: media }, { data: stories }, { data: gifts }, { data: guests }] = await Promise.all([
-    client.from('events').select('*').eq('invitation_id', invitation.id).order('date', { ascending: true }),
+    client
+      .from('events')
+      .select<'*', EventRow>()
+      .eq('invitation_id', invitation.id)
+      .order('date', { ascending: true }),
     client
       .from('media')
-      .select('*')
+      .select<'*', MediaRow>()
       .eq('invitation_id', invitation.id)
       .order('sort_index', { ascending: true }),
     client
       .from('stories')
-      .select('*')
+      .select<'*', StoryRow>()
       .eq('invitation_id', invitation.id)
       .order('sort_index', { ascending: true }),
-    client.from('gifts').select('*').eq('invitation_id', invitation.id).limit(1),
+    client
+      .from('gifts')
+      .select<'*', GiftRow>()
+      .eq('invitation_id', invitation.id)
+      .limit(1),
     client
       .from('guests')
-      .select('*')
+      .select<'*', GuestRow>()
       .eq('invitation_id', invitation.id)
       .order('created_at', { ascending: false })
       .limit(20),

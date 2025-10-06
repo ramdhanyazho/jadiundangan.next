@@ -3,7 +3,7 @@
 import { useEffect, useMemo } from 'react';
 import { MapPin } from 'lucide-react';
 import dynamic from 'next/dynamic';
-import type { MapContainerProps } from 'react-leaflet';
+import type { CSSProperties, ReactNode } from 'react';
 import L from 'leaflet';
 
 import Card from '../components/Card';
@@ -12,9 +12,17 @@ import Section from '../components/Section';
 
 import type { EventRow } from '@/types/db';
 
+type LeafletMapContainerProps = {
+  center?: L.LatLngExpression;
+  zoom?: number;
+  scrollWheelZoom?: boolean;
+  style?: CSSProperties;
+  children?: ReactNode;
+};
+
 const MapContainer = dynamic(() => import('react-leaflet').then((mod) => mod.MapContainer), {
   ssr: false,
-});
+}) as unknown as (props: LeafletMapContainerProps) => JSX.Element;
 const TileLayer = dynamic(() => import('react-leaflet').then((mod) => mod.TileLayer), {
   ssr: false,
 });
@@ -56,8 +64,8 @@ export default function Location({ events }: LocationProps) {
 
   if (!eventsWithCoordinates.length && !fallbackEvent) return null;
 
-  const center = eventsWithCoordinates.length
-    ? [eventsWithCoordinates[0].latitude, eventsWithCoordinates[0].longitude] as MapContainerProps['center']
+  const center: L.LatLngExpression | undefined = eventsWithCoordinates.length
+    ? [eventsWithCoordinates[0].latitude, eventsWithCoordinates[0].longitude]
     : undefined;
 
   return (
