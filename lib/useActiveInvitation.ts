@@ -16,34 +16,46 @@ export function useActiveInvitation() {
   useEffect(() => {
     let alive = true;
     (async () => {
-      setLoading(true);
-      const {
-        data: { user },
-      } = await sb.auth.getUser();
-      if (!user) {
+      try {
+        setLoading(true);
+        const {
+          data: { user },
+        } = await sb.auth.getUser();
+        if (!user) {
+          if (alive) {
+            setError('not-auth');
+            setInv(null);
+            setLoading(false);
+          }
+          return;
+        }
+
+        const { data, error } = await (sb
+          .from('invitations') as any)
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
         if (!alive) return;
-        setError('not-auth');
-        setInv(null);
-        setLoading(false);
-        return;
+        if (error) {
+          setError(error.message);
+          setInv(null);
+        } else {
+          setError(null);
+          setInv((data as Invitation | null) ?? null);
+        }
+      } catch (e: any) {
+        if (alive) {
+          setError(e?.message || 'unknown');
+          setInv(null);
+        }
+      } finally {
+        if (alive) {
+          setLoading(false);
+        }
       }
-
-      const { data, error } = await (sb
-        .from('invitations') as any)
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-
-      if (!alive) return;
-      if (error) {
-        setError(error.message);
-      } else {
-        setError(null);
-      }
-      setInv(data ?? null);
-      setLoading(false);
     })();
 
     return () => {

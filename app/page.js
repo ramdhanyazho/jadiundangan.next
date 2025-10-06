@@ -1,5 +1,7 @@
 import Link from 'next/link';
 
+import Brand from '@/components/Brand';
+
 const stats = [
   { value: '25+', label: 'Tema Premium Siap Pakai' },
   { value: '120K+', label: 'RSVP & Ucapan Masuk' },
@@ -111,9 +113,7 @@ export default function Home() {
     <main className="bg-slate-50 text-slate-900">
       <header className="sticky top-0 z-30 border-b border-slate-200/70 bg-white/85 backdrop-blur">
         <div className="container-wide flex items-center justify-between py-3">
-          <Link href="/" className="font-bold text-xl text-brand">
-            JadiUndangan
-          </Link>
+          <Brand />
           <nav className="hidden items-center gap-6 text-sm font-medium md:flex">
             <a href="#beranda" className="hover:text-brand">Beranda</a>
             <a href="#fitur" className="hover:text-brand">Fitur</a>

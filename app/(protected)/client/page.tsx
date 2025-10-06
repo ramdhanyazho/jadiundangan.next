@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
 import { getServerClient } from '@/lib/supabaseServer';
@@ -61,16 +62,19 @@ export default async function ClientDashboardPage() {
         title: 'Undangan Aktif',
         value: activeInvitationsDisplay,
         description: 'Jumlah undangan yang terhubung dengan akun Anda.',
+        href: '/client/settings',
       },
       {
         title: 'Total Kunjungan',
         value: totalVisitsDisplay,
         description: 'Akumulasi kunjungan dari semua undangan aktif.',
+        href: '/client/visitors',
       },
       {
         title: 'Ucapan',
         value: totalMessagesDisplay,
         description: 'Jumlah ucapan dan RSVP yang diterima tamu.',
+        href: '/client/testimonials',
       },
     ];
 
@@ -85,11 +89,15 @@ export default async function ClientDashboardPage() {
 
         <div className="grid gap-6 md:grid-cols-3">
           {cards.map((card) => (
-            <div key={card.title} className="rounded-2xl bg-white p-6 shadow-xl">
+            <Link
+              key={card.title}
+              href={card.href}
+              className="block rounded-2xl bg-white p-6 shadow-xl transition hover:shadow-2xl"
+            >
               <p className="text-sm font-medium text-gray-500">{card.title}</p>
               <p className="mt-4 text-3xl font-semibold text-gray-900">{card.value}</p>
               <p className="mt-2 text-xs text-gray-500">{card.description}</p>
-            </div>
+            </Link>
           ))}
         </div>
       </section>

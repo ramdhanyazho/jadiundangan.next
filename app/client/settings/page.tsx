@@ -18,13 +18,16 @@ type FormState = {
 };
 
 export default function SettingsPage() {
-  const { inv, setInv } = useActiveInvitation();
+  const { inv, setInv, loading } = useActiveInvitation();
   const [form, setForm] = useState<FormState | null>(null);
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!inv) return;
+    if (!inv) {
+      setForm(null);
+      return;
+    }
     setForm({
       slug: inv.slug || '',
       title: inv.title || '',
@@ -71,7 +74,9 @@ export default function SettingsPage() {
     setForm((prev) => (prev ? { ...prev, [key]: value } : prev));
   }
 
-  if (!inv || !form) return <p>Memuat…</p>;
+  if (loading) return <p>Memuat…</p>;
+  if (!inv) return <p>Belum ada undangan. Silakan buat undangan terlebih dahulu.</p>;
+  if (!form) return <p>Memuat…</p>;
 
   return (
     <form onSubmit={onSave} className="grid max-w-3xl gap-4">
@@ -80,26 +85,14 @@ export default function SettingsPage() {
       <Field label="Slug" value={form.slug} onChange={(v) => set('slug', v)} />
       <Field label="Judul" value={form.title} onChange={(v) => set('title', v)} />
       <div className="grid gap-4 md:grid-cols-2">
-        <Field
-          label="Nama Mempelai Pria"
-          value={form.groom_name}
-          onChange={(v) => set('groom_name', v)}
-        />
-        <Field
-          label="Nama Mempelai Wanita"
-          value={form.bride_name}
-          onChange={(v) => set('bride_name', v)}
-        />
+        <Field label="Nama Mempelai Pria" value={form.groom_name} onChange={(v) => set('groom_name', v)} />
+        <Field label="Nama Mempelai Wanita" value={form.bride_name} onChange={(v) => set('bride_name', v)} />
       </div>
       <div className="grid gap-4 md:grid-cols-2">
         <Field label="Tema" value={form.theme_slug} onChange={(v) => set('theme_slug', v)} />
         <Field label="Musik (URL)" value={form.music_url} onChange={(v) => set('music_url', v)} />
       </div>
-      <Field
-        label="Cover Photo URL"
-        value={form.cover_photo_url}
-        onChange={(v) => set('cover_photo_url', v)}
-      />
+      <Field label="Cover Photo URL" value={form.cover_photo_url} onChange={(v) => set('cover_photo_url', v)} />
       <Field
         label="Domain Kustom (suffix)"
         value={form.custom_domain_suffix}

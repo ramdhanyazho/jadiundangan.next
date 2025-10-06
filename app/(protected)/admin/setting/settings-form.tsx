@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react';
 
+import { LogoUploader } from '@/components/LogoUploader';
+
 const DEFAULTS = {
   trial_days: 7,
   active_days: 365,
@@ -44,6 +46,7 @@ export default function SettingsForm() {
 
   return (
     <div className="space-y-4">
+      <LogoUploader />
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Field label="Trial (hari)">
           <input
