@@ -1,49 +1,16 @@
-'use client';
-
-import { QRCodeSVG } from 'qrcode.react';
-import { LinkIcon } from 'lucide-react';
-
-import Card from '../components/Card';
-import Heading from '../components/Heading';
-import Section from '../components/Section';
-
-type QRCodeProps = {
-  slug: string;
-  guestName?: string;
-};
-
-const getInvitationUrl = (slug: string, guestName?: string) => {
-  if (typeof window === 'undefined') {
-    return `https://jadiundangan.id/u/${slug}`;
-  }
-  const origin = window.location.origin;
-  const url = new URL(`/u/${slug}`, origin);
-  if (guestName) {
-    url.searchParams.set('to', guestName);
-  }
-  return url.toString();
-};
-
-export default function QRCode({ slug, guestName }: QRCodeProps) {
-  const qrValue = getInvitationUrl(slug, guestName);
-
+export default function QRCodeSec({ slug }: { slug: string }) {
+  const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(
+    `https://jadiundangan.my.id/undangan/${slug}`
+  )}`;
   return (
-    <Section id="qrcode" className="bg-white">
-      <div className="mx-auto max-w-3xl">
-        <Heading
-          title="Bagikan Undangan"
-          description="Scan QR berikut untuk membuka undangan secara instan"
-        />
-        <Card className="flex flex-col items-center gap-4">
-          <QRCodeSVG value={qrValue} size={220} level="M" />
-          <div className="flex flex-col items-center gap-2 text-center">
-            <span className="inline-flex items-center gap-2 text-sm text-slate-600">
-              <LinkIcon className="h-4 w-4 text-sky-500" />
-              {qrValue}
-            </span>
-          </div>
-        </Card>
+    <section className="py-14 bg-white">
+      <div className="mx-auto max-w-sm px-6 text-center">
+        <h2 className="text-2xl font-semibold">Bagikan Undangan</h2>
+        <p className="mt-3 text-sm opacity-80">Scan kode QR di bawah ini untuk membagikan undangan kepada kerabat.</p>
+        <div className="mt-6 flex justify-center">
+          <img src={qrSrc} alt="QR Code Undangan" className="h-40 w-40 object-contain" />
+        </div>
       </div>
-    </Section>
+    </section>
   );
 }
