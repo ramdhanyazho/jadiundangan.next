@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-import { supabaseAnon } from '@/lib/supabaseAnon';
+import { getSupabaseAnonClient } from '@/lib/supabaseAnon';
 
 export async function POST(req: Request) {
   const { email } = (await req.json().catch(() => ({}))) as { email?: string };
@@ -8,7 +8,15 @@ export async function POST(req: Request) {
     return new NextResponse('email required', { status: 400 });
   }
 
-  const { error } = await supabaseAnon.auth.resend({
+  let supabase;
+  try {
+    supabase = getSupabaseAnonClient();
+  } catch (error) {
+    console.error('[resend-verification] Supabase client missing', error);
+    return new NextResponse('Supabase client not configured', { status: 500 });
+  }
+
+  const { error } = await supabase.auth.resend({
     email,
     type: 'signup',
     options: {
