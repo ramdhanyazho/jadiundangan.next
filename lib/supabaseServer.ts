@@ -7,9 +7,9 @@ import type { Database } from '@/types/db';
 const fallbackUrl = 'https://placeholder.supabase.co';
 const fallbackAnonKey = 'public-anon-key';
 
-export function getServerClient(): SupabaseClient<Database> {
+export function getServerClient(): SupabaseClient<Database, 'public', Database['public']> {
   const cookieStore = cookies();
-  return createServerClient<Database, 'public'>(
+  return createServerClient<Database, 'public', Database['public']>(
     process.env.NEXT_PUBLIC_SUPABASE_URL || fallbackUrl,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || fallbackAnonKey,
     {
