@@ -1,12 +1,10 @@
 import { NextResponse } from 'next/server';
 
 import { getServerClient } from '@/lib/supabaseServer';
-import type { Database, Profile } from '@/types/db';
 
 export async function POST(req: Request) {
-  const body = await req.json().catch(() => ({}));
-  const logoUrl = body?.logo_url as string | undefined;
-  if (!logoUrl) {
+  const { logo_url } = (await req.json().catch(() => ({}))) as { logo_url?: string };
+  if (!logo_url) {
     return new NextResponse('logo_url required', { status: 400 });
   }
 
@@ -18,13 +16,11 @@ export async function POST(req: Request) {
     return new NextResponse('Unauthorized', { status: 401 });
   }
 
-  type ProfileRoleInfo = Pick<Profile, 'is_admin' | 'role'>;
-
   const { data: profile, error: profileError } = await supabase
     .from('profiles')
     .select('is_admin, role')
     .eq('user_id', user.id)
-    .maybeSingle<ProfileRoleInfo>();
+    .maybeSingle();
 
   if (profileError) {
     return new NextResponse(profileError.message, { status: 400 });
@@ -35,14 +31,22 @@ export async function POST(req: Request) {
     return new NextResponse('Forbidden', { status: 403 });
   }
 
-  type BrandingSetting = Database['public']['Tables']['settings']['Insert'];
+  const { data: current, error: currentError } = await supabase
+    .from('settings')
+    .select('value')
+    .eq('key', 'branding')
+    .maybeSingle();
 
-  const brandingSettings: BrandingSetting = { key: 'branding', value: { logo_url: logoUrl } };
+  if (currentError) {
+    return new NextResponse(currentError.message, { status: 400 });
+  }
+
+  const nextValue = { ...(current?.value ?? {}), logo_url };
 
   const { error } = await supabase
     .from('settings')
-    // Supabase's generated types currently widen this table to `never`, so cast until the schema typings are updated.
-    .upsert(brandingSettings as never, { onConflict: 'key' });
+    .update({ value: nextValue })
+    .eq('key', 'branding');
 
   if (error) {
     return new NextResponse(error.message, { status: 400 });

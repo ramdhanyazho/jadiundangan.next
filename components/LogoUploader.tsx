@@ -17,35 +17,33 @@ export function LogoUploader() {
 
     try {
       const params = new URLSearchParams({
-        type: 'photo',
-        filename: file.name,
-        contentType: file.type || 'image/png',
-        invitation_id: 'brand',
+        contentType: file.type || 'application/octet-stream',
       });
-      const uploadUrlRes = await fetch(`/api/blob/upload-url?${params.toString()}`);
+
+      const uploadUrlRes = await fetch(`/api/blob/admin-upload-url?${params.toString()}`);
       if (!uploadUrlRes.ok) {
         throw new Error('Tidak dapat membuat upload URL');
       }
+
       const { url } = (await uploadUrlRes.json()) as { url?: string };
-      if (!url) throw new Error('Upload URL kosong');
+      if (!url) {
+        throw new Error('Upload URL kosong');
+      }
 
       const blobRes = await fetch(url, {
         method: 'POST',
-        headers: file.type ? { 'content-type': file.type } : undefined,
         body: file,
       });
       if (!blobRes.ok) {
         throw new Error('Upload gagal');
       }
-      let blobUrl = '';
-      try {
-        const json = await blobRes.json();
-        blobUrl = json?.url ?? '';
-      } catch {
-        blobUrl = blobRes.headers.get('location') ?? '';
-      }
+
+      const blobUrl =
+        blobRes.headers.get('location') ||
+        ((await blobRes.json().catch(() => ({ url: '' }))) as { url?: string }).url;
+
       if (!blobUrl) {
-        throw new Error('URL logo tidak tersedia');
+        throw new Error('Upload sukses tapi URL tidak ditemukan');
       }
 
       const brandingRes = await fetch('/api/admin/branding', {
@@ -59,7 +57,7 @@ export function LogoUploader() {
         throw new Error(text || 'Gagal menyimpan logo');
       }
 
-      setMessage('Logo diperbarui.');
+      setMessage('Logo diperbarui');
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Terjadi kesalahan';
       setError(msg);
