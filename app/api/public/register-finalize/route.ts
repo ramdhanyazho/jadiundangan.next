@@ -84,34 +84,36 @@ export async function POST(req: Request) {
   }
 
   const now = new Date().toISOString();
-  const { data: inserted, error: invErr } = await db
-    .from('invitations')
-    .insert({
-      user_id,
-      slug: base,
-      title: invitation.title || `The Wedding of ${invitation.groom_name} & ${invitation.bride_name}`,
-      groom_name: invitation.groom_name,
-      bride_name: invitation.bride_name,
-      theme_slug: theme.slug,
-      date_display: invitation.date_display ?? null,
-      music_url: null,
-      cover_photo_url: null,
-      pages_enabled: {
-        cover: true,
-        couple: true,
-        event: true,
-        wishes: true,
-        gallery: true,
-        story: true,
-        location: true,
-        qrcode: true,
-        prokes: false,
-        gift: true,
-      },
-      is_published: false,
-      created_at: now,
-      updated_at: now,
-    })
+  const invitationPayload = {
+    user_id,
+    slug: base,
+    title: invitation.title || `The Wedding of ${invitation.groom_name} & ${invitation.bride_name}`,
+    groom_name: invitation.groom_name,
+    bride_name: invitation.bride_name,
+    theme_slug: invitation.theme_slug,
+    date_display: invitation.date_display ?? null,
+    music_url: null,
+    cover_photo_url: null,
+    pages_enabled: {
+      cover: true,
+      couple: true,
+      event: true,
+      wishes: true,
+      gallery: true,
+      story: true,
+      location: true,
+      qrcode: true,
+      prokes: false,
+      gift: true,
+    },
+    is_published: false,
+    created_at: now,
+    updated_at: now,
+  } satisfies Database['public']['Tables']['invitations']['Insert'];
+
+  const invitationsQuery = db.from('invitations') as any;
+  const { data: inserted, error: invErr } = await invitationsQuery
+    .insert(invitationPayload)
     .select('id')
     .maybeSingle();
 
@@ -135,9 +137,10 @@ export async function POST(req: Request) {
         date_display: invitation.date_display ?? null,
         location: invitation.location ?? null,
       },
-    ];
+    ] satisfies Database['public']['Tables']['events']['Insert'][];
 
-    const { error: eventsError } = await db.from('events').insert(eventsPayload);
+    const eventsQuery = db.from('events') as any;
+    const { error: eventsError } = await eventsQuery.insert(eventsPayload);
     if (eventsError) {
       console.warn('[register-finalize] failed to insert default events', eventsError);
     }

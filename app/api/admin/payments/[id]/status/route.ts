@@ -1,13 +1,28 @@
 import { requireAdmin } from '@/lib/adminGuard';
+import { getAdminClient } from '@/lib/supabaseAdmin';
+import type { Database } from '@/types/db';
+
+const ALLOWED_STATUSES = ['paid', 'unpaid'] as const;
+type PaymentStatus = (typeof ALLOWED_STATUSES)[number];
 export const dynamic = 'force-dynamic';
 
 export async function PATCH(req: Request, { params }: { params: { id: string } }) {
-  const { admin } = await requireAdmin();
+  await requireAdmin();
+  const supabaseAdmin = getAdminClient();
   const body = await req.json();
-  const status = String(body?.status || '');
-  if (!['paid', 'unpaid'].includes(status)) return new Response('Invalid status', { status: 400 });
+  const statusInput = String(body?.status || '');
+  if (!ALLOWED_STATUSES.includes(statusInput as PaymentStatus)) {
+    return new Response('Invalid status', { status: 400 });
+  }
 
-  const { error } = await admin.from('payments').update({ status }).eq('id', params.id);
+  const status = statusInput as PaymentStatus;
+
+  const patchPayload = { status } satisfies Database['public']['Tables']['payments']['Update'];
+
+  const paymentsTable = 'payments' satisfies keyof Database['public']['Tables'];
+  const paymentsQuery = supabaseAdmin.from(paymentsTable) as any;
+
+  const { error } = await paymentsQuery.update(patchPayload).eq('id', params.id);
   if (error) return new Response(error.message, { status: 400 });
   return new Response(null, { status: 204 });
 }
