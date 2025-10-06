@@ -139,7 +139,10 @@ export async function POST(req: Request) {
       },
     ];
 
-    await db.from('events').insert(eventsPayload).catch(() => undefined);
+    const { error: eventsError } = await db.from('events').insert(eventsPayload);
+    if (eventsError) {
+      console.warn('[register-finalize] failed to insert default events', eventsError);
+    }
   }
 
   return NextResponse.json({ ok: true });
