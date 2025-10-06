@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
+import { upsertProfileWithRetry } from '@/lib/upsertProfileWithRetry';
 
 type Payload = {
   account: { email: string; password: string; full_name?: string };
@@ -84,15 +85,12 @@ export async function POST(req: Request) {
 
   const user_id = createdUser.user.id;
 
-  const { error: profileErr } = await supabaseAdmin.from('profiles').upsert(
-    {
-      user_id,
-      email,
-      full_name,
-      is_admin: false,
-    },
-    { onConflict: 'user_id' }
-  );
+  const { error: profileErr } = await upsertProfileWithRetry(supabaseAdmin, {
+    user_id,
+    email,
+    full_name,
+    is_admin: false,
+  });
 
   if (profileErr) {
     return new NextResponse(profileErr.message, { status: 400 });
