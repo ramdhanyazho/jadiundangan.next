@@ -3,6 +3,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 
+import { sb } from '@/lib/supabaseBrowser';
+
 type Theme = { slug: string; name: string };
 
 type Step = 1 | 2;
@@ -12,7 +14,6 @@ export default function RegisterPage() {
   const [themes, setThemes] = useState<Theme[]>([]);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
 
   const [email, setEmail] = useState('');
   const [pass, setPass] = useState('');
@@ -96,27 +97,34 @@ export default function RegisterPage() {
 
     setBusy(true);
     setMessage(null);
-    setSuccess(false);
-
     try {
-      const payload = {
-        account: { email, password: pass, full_name: name },
-        invitation: {
-          slug: slug || undefined,
-          title: `The Wedding of ${groom} & ${bride}`,
-          groom_name: groom,
-          bride_name: bride,
-          theme_slug: themeSlug,
-          date_display: dateDisplay || undefined,
-          location: location || undefined,
-        },
-        options: { confirmEmail: true },
-      };
+      const { data, error } = await sb.auth.signUp({
+        email,
+        password: pass,
+        options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
+      });
 
-      const response = await fetch('/api/public/register', {
+      if (error || !data.user) {
+        setMessage(error?.message || 'Sign up failed');
+        return;
+      }
+
+      const response = await fetch('/api/public/register-finalize', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({
+          user_id: data.user.id,
+          account: { email, full_name: name },
+          invitation: {
+            slug: slug || undefined,
+            groom_name: groom,
+            bride_name: bride,
+            title: `The Wedding of ${groom} & ${bride}`,
+            theme_slug: themeSlug,
+            date_display: dateDisplay || null,
+            location: location || null,
+          },
+        }),
       });
 
       if (!response.ok) {
@@ -125,10 +133,11 @@ export default function RegisterPage() {
         return;
       }
 
-      setSuccess(true);
-      setMessage(null);
+      setMessage('Akun dibuat. Silakan cek email verifikasi.');
+      window.location.href = '/client/login?created=1';
     } catch (error) {
-      setMessage('Terjadi kesalahan. Silakan coba lagi.');
+      const msg = error instanceof Error ? error.message : 'Terjadi kesalahan. Silakan coba lagi.';
+      setMessage(msg);
     } finally {
       setBusy(false);
     }
@@ -226,12 +235,6 @@ export default function RegisterPage() {
             </label>
 
             {message && <p className="text-sm text-rose-600">{message}</p>}
-            {success && (
-              <div className="rounded border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700">
-                Akun dibuat, cek email verifikasi.
-              </div>
-            )}
-
             <div className="flex flex-wrap gap-3">
               <button
                 disabled={busy || !canSubmitInvitation}

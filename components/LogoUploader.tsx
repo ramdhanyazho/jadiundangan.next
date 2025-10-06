@@ -22,7 +22,9 @@ export function LogoUploader() {
 
       const uploadUrlRes = await fetch(`/api/blob/admin-upload-url?${params.toString()}`);
       if (!uploadUrlRes.ok) {
-        throw new Error('Tidak dapat membuat upload URL');
+        const text = await uploadUrlRes.text();
+        setError(text || 'Tidak dapat membuat upload URL');
+        return;
       }
 
       const { url } = (await uploadUrlRes.json()) as { url?: string };
@@ -35,7 +37,8 @@ export function LogoUploader() {
         body: file,
       });
       if (!blobRes.ok) {
-        throw new Error('Upload gagal');
+        const text = await blobRes.text();
+        throw new Error(text || 'Upload gagal');
       }
 
       const blobUrl =
