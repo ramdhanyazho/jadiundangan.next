@@ -1,0 +1,22 @@
+<svg width="1600" height="200" viewBox="0 0 1600 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1600" height="200" fill="url(#paint0_linear)" />
+  <g opacity="0.25" fill="white">
+    <path d="M0 120L80 80L160 120L240 80L320 120L400 80L480 120L560 80L640 120L720 80L800 120L880 80L960 120L1040 80L1120 120L1200 80L1280 120L1360 80L1440 120L1520 80L1600 120V200H0V120Z" />
+    <circle cx="40" cy="70" r="24" />
+    <circle cx="200" cy="70" r="18" />
+    <circle cx="360" cy="70" r="24" />
+    <circle cx="520" cy="70" r="18" />
+    <circle cx="680" cy="70" r="24" />
+    <circle cx="840" cy="70" r="18" />
+    <circle cx="1000" cy="70" r="24" />
+    <circle cx="1160" cy="70" r="18" />
+    <circle cx="1320" cy="70" r="24" />
+    <circle cx="1480" cy="70" r="18" />
+  </g>
+  <defs>
+    <linearGradient id="paint0_linear" x1="800" y1="0" x2="800" y2="200" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#1e293b" />
+      <stop offset="1" stop-color="#0f172a" />
+    </linearGradient>
+  </defs>
+</svg>
