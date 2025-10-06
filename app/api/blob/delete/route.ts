@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { del } from '@vercel/blob';
 
 import { getServerClient } from '@/lib/supabaseServer';
-import type { Database } from '@/types/db';
 
 export const runtime = 'edge';
 
@@ -20,18 +19,23 @@ export async function POST(req: NextRequest) {
     return new NextResponse('Unauthorized', { status: 401 });
   }
 
-  const { data: row } = await supabase
+  const { data: mediaRow } = await supabase
     .from('media')
-    .select('id, url, invitation_id, invitations!inner(user_id)')
+    .select('id, url, invitation_id')
     .eq('id', media_id)
     .maybeSingle();
 
-  const mediaRow = row as (Database['public']['Tables']['media']['Row'] & {
-    invitations?: { user_id?: string | null } | null;
-  }) | null;
+  if (!mediaRow?.invitation_id) {
+    return new NextResponse('Forbidden', { status: 403 });
+  }
 
-  const ownerId = mediaRow?.invitations?.user_id;
-  if (!mediaRow || ownerId !== user.id) {
+  const { data: invitation } = await supabase
+    .from('invitations')
+    .select('user_id')
+    .eq('id', mediaRow.invitation_id)
+    .maybeSingle();
+
+  if (!invitation || invitation.user_id !== user.id) {
     return new NextResponse('Forbidden', { status: 403 });
   }
 
