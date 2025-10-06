@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 import { getServerClient } from '@/lib/supabaseServer';
+import type { Profile } from '@/types/db';
 
 export const runtime = 'edge';
 
@@ -69,11 +70,13 @@ export async function GET(req: NextRequest) {
   }
 
   if (invitationId === 'brand') {
+    type ProfileRoleInfo = Pick<Profile, 'is_admin' | 'role'>;
+
     const { data: profile } = await supabase
       .from('profiles')
       .select('is_admin, role')
       .eq('user_id', user.id)
-      .maybeSingle();
+      .maybeSingle<ProfileRoleInfo>();
 
     const isAdmin = !!profile && (profile.is_admin === true || profile.role === 'admin');
     if (!isAdmin) {
