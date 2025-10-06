@@ -24,7 +24,7 @@ type GuestRow = {
 const defaultForm: GuestForm = { name: '', status: 'pending', message: '', seats: 1 };
 
 export default function GuestsPage() {
-  const { inv } = useActiveInvitation();
+  const { inv, loading: invitationLoading } = useActiveInvitation();
   const [rows, setRows] = useState<GuestRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [form, setForm] = useState<GuestForm>({ ...defaultForm });
@@ -42,6 +42,11 @@ export default function GuestsPage() {
   }
 
   useEffect(() => {
+    if (!inv) {
+      setRows([]);
+      setLoading(false);
+      return;
+    }
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [inv?.id]);
@@ -66,7 +71,8 @@ export default function GuestsPage() {
     load();
   }
 
-  if (!inv) return <p>Memuat…</p>;
+  if (invitationLoading) return <p>Memuat…</p>;
+  if (!inv) return <p>Belum ada undangan. Silakan buat undangan terlebih dahulu.</p>;
 
   return (
     <div className="space-y-6">
@@ -100,9 +106,7 @@ export default function GuestsPage() {
           min={1}
           className="rounded border px-3 py-2"
           value={form.seats}
-          onChange={(e) =>
-            setForm((f) => ({ ...f, seats: Number(e.target.value || 1) }))
-          }
+          onChange={(e) => setForm((f) => ({ ...f, seats: Number(e.target.value || 1) }))}
         />
         <button className="rounded bg-slate-900 px-4 py-2 text-white">Simpan</button>
       </form>
@@ -153,9 +157,7 @@ export default function GuestsPage() {
                       min={1}
                       className="w-20 rounded border px-2 py-1"
                       defaultValue={r.seats || 1}
-                      onBlur={(e) =>
-                        updateRow(r.id, { seats: Number(e.target.value || 1) })
-                      }
+                      onBlur={(e) => updateRow(r.id, { seats: Number(e.target.value || 1) })}
                     />
                   </td>
                   <td className="p-2">
