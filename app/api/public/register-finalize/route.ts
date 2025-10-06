@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
+import type { Database } from '@/types/db';
+import { upsertProfileWithRetry } from '@/lib/upsertProfileWithRetry';
+
 type Payload = {
   user_id: string;
   account: { email: string; full_name?: string | null };
@@ -16,7 +19,7 @@ type Payload = {
 };
 
 const admin = () =>
-  createClient(
+  createClient<Database, 'public'>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
     { auth: { autoRefreshToken: false, persistSession: false } }
@@ -69,17 +72,12 @@ export async function POST(req: Request) {
     return new NextResponse('Slug already taken', { status: 409 });
   }
 
-  const { error: profileErr } = await db
-    .from('profiles')
-    .upsert(
-      {
-        user_id,
-        email: account.email,
-        full_name: account.full_name ?? null,
-        is_admin: false,
-      },
-      { onConflict: 'user_id' }
-    );
+  const { error: profileErr } = await upsertProfileWithRetry(db, {
+    user_id,
+    email: account.email,
+    full_name: account.full_name ?? null,
+    is_admin: false,
+  });
 
   if (profileErr) {
     return new NextResponse(profileErr.message, { status: 400 });
