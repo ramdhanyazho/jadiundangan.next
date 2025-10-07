@@ -2,7 +2,36 @@
 @tailwind components;
 @tailwind utilities;
 
-:root { --bg-hero: 255,255,255; --text-hero: 14,53,107; }
+:root {
+  --bg-hero: 255,255,255;
+  --text-hero: 14,53,107;
+  --invitation-bg: #0B1220;
+  --invitation-card: rgba(255, 255, 255, 0.06);
+  --invitation-muted: #A3B3C2;
+  --invitation-accent: #7C3AED;
+  --invitation-accent-hover: #6D28D9;
+  --radius-3xl: 1.5rem;
+  --shadow-soft: 0 20px 50px rgba(0, 0, 0, 0.45);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--invitation-bg);
+  color: #ffffff;
+  font-feature-settings: 'liga' 1, 'kern' 1;
+}
+
+a {
+  color: inherit;
+}
+
+a:hover {
+  color: var(--invitation-accent);
+}
+
 [data-theme="jawabiru"] { --bg-hero: 240,245,255; --text-hero: 14,53,107; }
 [data-theme="minimal"] { --bg-hero: 255,255,255; --text-hero: 17,24,39; }
 [data-theme="forest"] { --bg-hero: 240,255,248; --text-hero: 3,84,63; }
@@ -20,4 +49,8 @@
   background-size: 300px;
   background-repeat: repeat;
   mix-blend-mode: multiply;
+}
+
+::selection {
+  background-color: rgba(124, 58, 237, 0.35);
 }
