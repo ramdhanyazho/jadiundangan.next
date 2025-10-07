@@ -4,6 +4,8 @@ export type Couple = {
   panggilanWanita: string;
   namaWanita: string;
   fotoCoverUrl?: string;
+  fotoPriaUrl?: string;
+  fotoWanitaUrl?: string;
 };
 
 export type EventItem = {
@@ -23,9 +25,12 @@ export type Stats = {
 };
 
 export type Comment = {
+  id: string;
   nama: string;
   pesan: string;
   waktuISO: string;
+  presence?: 'present' | 'absent' | 'unknown';
+  likes?: number;
 };
 
 export type Parents = {
