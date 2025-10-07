@@ -40,6 +40,9 @@ export function CommentForm({ slug, onSubmitted }: CommentFormProps) {
       }
       setStatus('success');
       const newComment: Comment = {
+        id: typeof crypto !== 'undefined' && 'randomUUID' in crypto
+          ? crypto.randomUUID()
+          : `${Date.now()}`,
         nama,
         pesan,
         waktuISO: new Date().toISOString(),
