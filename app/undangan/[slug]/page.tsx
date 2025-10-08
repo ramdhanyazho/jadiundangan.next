@@ -21,7 +21,7 @@ export default function InvitationPage({ params }: PageProps) {
   }
 
   return (
-    <div id="undangan4x" className="u4x bg-white-black position-relative" data-section-id="root">
+    <>
       <main className="position-relative pb-5 mb-5" data-bs-spy="scroll" data-bs-target="#navbar-menu" data-bs-smooth-scroll="true">
         <Hero hero={invitation.hero} />
         <SectionMempelai couple={invitation.couple} />
@@ -58,6 +58,6 @@ export default function InvitationPage({ params }: PageProps) {
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }

@@ -32,20 +32,23 @@ export function Tabbar() {
   return (
     <nav
       id="navbar-menu"
-      className="position-fixed bottom-0 start-50 translate-middle-x w-100 px-3 pb-3"
+      className="navbar navbar-expand sticky-bottom rounded-top-4 border-top p-0"
       aria-label="Navigasi undangan"
     >
-      <ul className="nav nav-pills bg-overlay-auto shadow rounded-4 justify-content-around py-2">
+      <ul className="navbar-nav nav-justified w-100 align-items-center">
         {items.map(({ id, label, Icon }) => (
           <li key={id} className="nav-item">
             <Link
               href={`#${id}`}
-              className="nav-link text-center d-flex flex-column align-items-center gap-1 px-2"
+              className="nav-link text-center d-flex flex-column align-items-center py-2"
               data-tab-target={id}
               scroll={false}
+              prefetch={false}
             >
               <Icon className="tab-icon" width={20} height={20} />
-              <span className="small">{label}</span>
+              <span className="d-block" style={{ fontSize: '0.7rem' }}>
+                {label}
+              </span>
             </Link>
           </li>
         ))}
