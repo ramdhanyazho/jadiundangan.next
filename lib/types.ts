@@ -42,6 +42,13 @@ export interface InvitationMessage {
   createdAt: string;
 }
 
+export interface Comment {
+  id: string;
+  nama: string;
+  pesan: string;
+  waktuISO: string;
+}
+
 export interface InvitationStats {
   comments: number;
   present: number;
