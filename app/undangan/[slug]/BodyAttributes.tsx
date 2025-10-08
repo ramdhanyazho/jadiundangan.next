@@ -48,17 +48,30 @@ export default function BodyAttributes() {
 
     head.appendChild(bootstrap);
 
+    const guest = document.createElement('script');
+    guest.src = '/themes/undangan-4x/js/guest.js';
+    guest.async = true;
+    guest.defer = true;
+
     const guestPromise = bootstrapPromise
       .catch(() => undefined)
       .then(async () => {
-        await import(/* webpackIgnore: true */ '/themes/undangan-4x/js/guest.js');
+        const promise = new Promise<void>((resolve, reject) => {
+          guest.onload = () => resolve();
+          guest.onerror = () => reject(new Error('Failed to load guest script.'));
+        });
+
+        head.appendChild(guest);
+        await promise;
         window.dispatchEvent(new Event('load'));
-      });
+      })
+      .catch(() => undefined);
 
     void guestPromise;
 
     return () => {
       bootstrap.remove();
+      guest.remove();
 
       if (appendedThemeMeta) {
         appendedThemeMeta.remove();
