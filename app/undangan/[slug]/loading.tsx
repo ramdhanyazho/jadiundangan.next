@@ -1,7 +1,7 @@
-export default function InvitationLoading() {
+export default function Loading() {
   return (
-    <div className="d-flex justify-content-center align-items-center min-vh-100">
-      <div className="spinner-border text-secondary" role="status" aria-label="Memuat undangan" />
+    <div className="min-h-screen bg-black text-white flex items-center justify-center">
+      Memuat undangan...
     </div>
   );
 }

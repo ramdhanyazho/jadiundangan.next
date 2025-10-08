@@ -1,7 +1,13 @@
-const formatDate = (value: string) => {
-  const date = new Date(value);
-  const iso = date.toISOString().replace(/[-:]/g, '');
-  return iso.slice(0, 15) + 'Z';
+const formatDate = (iso: string) => {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) {
+    throw new Error('Invalid date provided');
+  }
+
+  return date
+    .toISOString()
+    .replace(/[-:]/g, '')
+    .split('.')[0];
 };
 
 export function gcalEventUrl(
@@ -9,15 +15,18 @@ export function gcalEventUrl(
   startISO: string,
   endISO: string,
   location: string,
-  detailsUrl: string
+  detailsUrl?: string,
 ) {
-  const base = 'https://calendar.google.com/calendar/render';
-  const params = new URLSearchParams({
-    action: 'TEMPLATE',
-    text: title,
-    dates: `${formatDate(startISO)}/${formatDate(endISO)}`,
-    location,
-    details: detailsUrl,
-  });
-  return `${base}?${params.toString()}`;
+  const url = new URL('https://calendar.google.com/calendar/render');
+  const details = detailsUrl
+    ? `${detailsUrl}\n\n` + 'Tanpa mengurangi rasa hormat, kami mengundang Anda.'
+    : 'Tanpa mengurangi rasa hormat, kami mengundang Anda.';
+
+  url.searchParams.set('action', 'TEMPLATE');
+  url.searchParams.set('text', title);
+  url.searchParams.set('dates', `${formatDate(startISO)}/${formatDate(endISO)}`);
+  url.searchParams.set('location', location);
+  url.searchParams.set('details', details);
+
+  return url.toString();
 }
