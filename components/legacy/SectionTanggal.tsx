@@ -123,7 +123,7 @@ export function SectionTanggal({
             rel="noreferrer"
             className="btn btn-outline-auto btn-sm rounded-pill shadow mb-2 px-3"
           >
-            Lihat Google Maps
+            Buka Maps
           </Link>
           <small className="d-block my-1">{venue}</small>
         </div>

@@ -1,5 +1,4 @@
 import Image from 'next/image';
-import Link from 'next/link';
 import type { InvitationHero } from '@/lib/types';
 import { CalendarIcon } from './Icon/CalendarIcon';
 
@@ -38,7 +37,7 @@ export function Hero({ hero }: { hero: InvitationHero }) {
         <p className="my-2" style={{ fontSize: '1.25rem' }}>
           {hero.subtitle}
         </p>
-        <Link
+        <a
           href={hero.googleCalendarUrl}
           className="btn btn-outline-auto btn-sm shadow rounded-pill px-3 py-1 d-inline-flex align-items-center justify-content-center gap-2"
           style={{ fontSize: '0.825rem' }}
@@ -47,7 +46,7 @@ export function Hero({ hero }: { hero: InvitationHero }) {
         >
           <CalendarIcon width={16} height={16} />
           <span>Save Google Calendar</span>
-        </Link>
+        </a>
         <div className="d-flex justify-content-center align-items-center mt-4 mb-2">
           <div className="mouse-animation border border-secondary border-2 rounded-5 px-2 py-1 opacity-50">
             <div className="scroll-animation rounded-4 bg-secondary" />

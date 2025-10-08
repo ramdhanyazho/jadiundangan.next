@@ -12,6 +12,7 @@ export default function InvitationHead() {
         href="https://fonts.googleapis.com/css2?family=Sacramento&family=Noto+Naskh+Arabic&display=swap"
       />
       <link rel="stylesheet" href="/themes/undangan-4x/css/undangan4x.css" />
+      <link rel="stylesheet" href="/themes/undangan-4x/css/undangan4x.scoped.css" />
     </>
   );
 }

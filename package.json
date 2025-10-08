@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "prefix:undangan4x": "tsx scripts/prefix-undangan4x.ts",
+    "postinstall": "npm run prefix:undangan4x"
   },
   "dependencies": {
     "@supabase/ssr": "^0.7.0",
@@ -30,6 +32,7 @@
     "eslint-config-next": "14.2.5",
     "postcss": "^8.4.38",
     "tailwindcss": "^3.4.10",
+    "tsx": "^4.15.7",
     "typescript": "5.4.5"
   }
 }

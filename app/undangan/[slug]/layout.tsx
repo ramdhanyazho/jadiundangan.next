@@ -6,7 +6,9 @@ export default function InvitationLayout({ children }: { children: ReactNode }) 
   return (
     <>
       <BootstrapThemeClient theme="dark" />
-      {children}
+      <div id="undangan4x" className="u4x bg-white-black position-relative" data-section-id="root">
+        {children}
+      </div>
       <Script src="/themes/undangan-4x/js/guest.js" strategy="afterInteractive" />
     </>
   );
