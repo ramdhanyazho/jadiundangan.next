@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-css-tags, @next/next/no-page-custom-font */
 export default function InvitationHead() {
   return (
     <>

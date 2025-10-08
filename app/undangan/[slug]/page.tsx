@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import { notFound } from 'next/navigation';
 import { Hero } from '@/components/legacy/Hero';
 import { SectionGaleri } from '@/components/legacy/SectionGaleri';
