@@ -22,7 +22,8 @@ export function Hero({ couple, firstEvent }: HeroProps) {
     `${couple.panggilanPria} & ${couple.panggilanWanita}`,
     firstEventStart.toISOString(),
     firstEventEnd.toISOString(),
-    firstEvent.alamat
+    firstEvent.alamat,
+    firstEvent.detailUrl ?? ''
   );
   const eventDateLabel = formatIndonesianDate(firstEventStart);
 
