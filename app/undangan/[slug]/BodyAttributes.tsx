@@ -50,6 +50,7 @@ export default function BodyAttributes() {
 
     const guest = document.createElement('script');
     guest.src = '/themes/undangan-4x/js/guest.js';
+    guest.type = 'module';
     guest.async = true;
     guest.defer = true;
 
