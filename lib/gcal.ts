@@ -1,28 +1,23 @@
-import { getSiteUrl } from './getSiteUrl';
-
-function normalizeIso(iso: string) {
-  return iso.replace(/[-:]/g, '').replace(/\.\d{3}/, '');
-}
+const formatDate = (value: string) => {
+  const date = new Date(value);
+  const iso = date.toISOString().replace(/[-:]/g, '');
+  return iso.slice(0, 15) + 'Z';
+};
 
 export function gcalEventUrl(
   title: string,
   startISO: string,
   endISO: string,
   location: string,
-  detailsUrl?: string
+  detailsUrl: string
 ) {
-  const params = new URLSearchParams();
-  params.set('action', 'TEMPLATE');
-  params.set('text', title);
-  params.set('dates', `${normalizeIso(startISO)}/${normalizeIso(endISO)}`);
-  if (location) {
-    params.set('location', location);
-  }
-  const fallback = getSiteUrl();
-  const details = detailsUrl
-    ? `${detailsUrl}\n\nTerima kasih telah berbagi kebahagiaan bersama kami.`
-    : fallback;
-  params.set('details', details);
-  params.set('trp', 'false');
-  return `https://www.google.com/calendar/render?${params.toString()}`;
+  const base = 'https://calendar.google.com/calendar/render';
+  const params = new URLSearchParams({
+    action: 'TEMPLATE',
+    text: title,
+    dates: `${formatDate(startISO)}/${formatDate(endISO)}`,
+    location,
+    details: detailsUrl,
+  });
+  return `${base}?${params.toString()}`;
 }
