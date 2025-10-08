@@ -1,27 +1,17 @@
+import { Skeleton } from '@/components/ui/skeleton';
+
 export default function Loading() {
   return (
-    <div className="container py-5 text-white">
-      <div className="placeholder-glow mb-4">
-        <div className="rounded-4 bg-white bg-opacity-10" style={{ height: '18rem' }}>
-          <span className="placeholder col-12 h-100 rounded-4" />
-        </div>
+    <div className="mx-auto flex max-w-5xl flex-col gap-6 px-6 py-10">
+      <div className="h-[320px] overflow-hidden rounded-3xl border border-white/10 bg-white/5">
+        <Skeleton className="h-full w-full" />
       </div>
-      <div className="row g-3 mb-4">
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
         {Array.from({ length: 4 }).map((_, index) => (
-          <div key={index} className="col-6 col-md-3">
-            <div className="placeholder-glow">
-              <div className="rounded-4 bg-white bg-opacity-10" style={{ height: '6rem' }}>
-                <span className="placeholder col-12 h-100 rounded-4" />
-              </div>
-            </div>
-          </div>
+          <Skeleton key={index} className="h-[150px] rounded-3xl" />
         ))}
       </div>
-      <div className="placeholder-glow">
-        <div className="rounded-4 bg-white bg-opacity-10" style={{ height: '16rem' }}>
-          <span className="placeholder col-12 h-100 rounded-4" />
-        </div>
-      </div>
+      <Skeleton className="h-64 rounded-3xl" />
     </div>
   );
 }
