@@ -56,6 +56,8 @@ export interface InvitationStats {
   likes: number;
 }
 
+export type Stats = InvitationStats;
+
 export interface InvitationContent {
   slug: string;
   hero: InvitationHero;
@@ -69,4 +71,27 @@ export interface InvitationContent {
   gallery: InvitationGalleryItem[];
   messages: InvitationMessage[];
   stats: InvitationStats;
+}
+
+export interface Couple {
+  namaPria: string;
+  namaWanita: string;
+  panggilanPria: string;
+  panggilanWanita: string;
+  fotoCoverUrl?: string | null;
+}
+
+export interface Parents {
+  pria: string;
+  wanita: string;
+}
+
+export interface EventItem {
+  label: string;
+  tanggal: string;
+  jamMulai: string;
+  jamSelesai: string;
+  alamat: string;
+  detailUrl?: string | null;
+  gmapsUrl?: string | null;
 }
