@@ -265,12 +265,11 @@ export default function Home() {
                 Pilih tema favoritmu dan personalisasikan dengan foto, cerita perjalanan, hingga jadwal acara. Semua tema responsif dan siap dipakai di perangkat mobile.
               </p>
             </div>
-            <Link
-              href="/undangan/contoh-rahmat-nisa"
-              className="self-start rounded-full border border-brand/40 px-5 py-2 text-sm font-semibold text-brand transition hover:bg-brand/10"
-            >
-              Lihat Semua Tema
-            </Link>
+            <ThemeDemoLauncher
+              themes={heroDemoThemes}
+              label="Lihat Semua Tema"
+              buttonClassName="self-start rounded-full border border-brand/40 px-5 py-2 text-sm font-semibold text-brand transition hover:bg-brand/10"
+            />
           </div>
           <div className="mt-10 grid gap-6 md:grid-cols-3">
             {themes.map((theme) => (
