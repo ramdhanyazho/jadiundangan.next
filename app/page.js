@@ -1,6 +1,52 @@
 import Link from 'next/link';
 
 import Brand from '@/components/Brand';
+import ThemeDemoLauncher from '@/components/ThemeDemoLauncher';
+
+const heroDemoThemes = [
+  {
+    name: 'Ulems Classic Emerald',
+    accent: 'from-brand via-brand/30 to-slate-100',
+    description: 'Perpaduan hijau emerald dan emas lembut dengan nuansa islami modern.',
+    href: '/themes/ulems/preview',
+    badge: 'Premium',
+  },
+  {
+    name: 'Jawabiru Elegan',
+    accent: 'from-sky-400/60 via-sky-200 to-white',
+    description: 'Motif batik biru dengan tipografi serif yang klasik dan hangat.',
+    href: '/undangan/contoh-rahmat-nisa?demo=jawabiru',
+    badge: 'Tradisional',
+  },
+  {
+    name: 'Minimal Bloom',
+    accent: 'from-rose-200 via-white to-slate-100',
+    description: 'Tema minimalis bertabur ilustrasi floral pastel yang menenangkan.',
+    href: '/undangan/contoh-rahmat-nisa?demo=minimal-bloom',
+    badge: 'Modern',
+  },
+  {
+    name: 'Forest Emerald',
+    accent: 'from-emerald-400/60 via-emerald-200 to-white',
+    description: 'Nuansa forest green dengan aksen watercolor untuk acara outdoor.',
+    href: '/undangan/contoh-rahmat-nisa?demo=forest-emerald',
+    badge: 'Outdoor',
+  },
+  {
+    name: 'Cinematic Highlight',
+    accent: 'from-slate-900/80 via-slate-700/50 to-slate-200',
+    description: 'Tata letak hero fullscreen dengan fokus video cinematic dan countdown.',
+    href: '/themes/ulems/preview?demo=cinematic',
+    badge: 'Video',
+  },
+  {
+    name: 'Indigo Classic',
+    accent: 'from-indigo-500/60 via-indigo-200 to-white',
+    description: 'Skema warna indigo mewah dengan elemen ornamen klasik kekinian.',
+    href: '/undangan/contoh-rahmat-nisa?demo=indigo-classic',
+    badge: 'Elegan',
+  },
+];
 
 const stats = [
   { value: '25+', label: 'Tema Premium Siap Pakai' },
@@ -158,12 +204,10 @@ export default function Home() {
             >
               Buat Undangan Sekarang
             </Link>
-            <Link
-              href="/undangan/contoh-rahmat-nisa"
-              className="rounded-xl border border-slate-200 bg-white px-6 py-3 text-base font-semibold text-slate-800 shadow-sm transition hover:border-brand hover:text-brand"
-            >
-              Lihat Demo Tema
-            </Link>
+            <ThemeDemoLauncher
+              themes={heroDemoThemes}
+              buttonClassName="rounded-xl border border-slate-200 bg-white px-6 py-3 text-base font-semibold text-slate-800 shadow-sm transition hover:border-brand hover:text-brand"
+            />
           </div>
           <dl className="mt-12 grid gap-4 md:grid-cols-3">
             {stats.map((item) => (
