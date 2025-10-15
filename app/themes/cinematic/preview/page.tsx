@@ -1,11 +1,13 @@
 "use client";
 
+import Image from "next/image";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import {
   CINEMATIC_POSTER_PLACEHOLDER,
   CINEMATIC_VIDEO_PLACEHOLDER,
 } from "@/lib/assets/placeholders";
+import cinematicCoverImage from "@/themes/cinematic-highlight/cinematic.png";
 
 const data = {
   couple: {
@@ -88,6 +90,7 @@ function useCountdown(targetISO: string) {
 }
 
 export default function Page() {
+  const [hasOpenedInvitation, setHasOpenedInvitation] = useState(false);
   const target = "2026-06-21T09:00:00+07:00";
   const { d, h, m, s } = useCountdown(target);
   const videoSrc = useMemo(
@@ -108,6 +111,38 @@ export default function Page() {
     ],
     [d, h, m, s],
   );
+
+  if (!hasOpenedInvitation) {
+    return (
+      <main className="min-h-screen bg-black text-white">
+        <section className="relative flex min-h-screen items-center justify-center overflow-hidden px-6">
+          <Image
+            src={cinematicCoverImage}
+            alt="Cinematic highlight cover"
+            fill
+            priority
+            placeholder="blur"
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+          <div className="absolute inset-0 bg-white/80 backdrop-blur-sm" />
+          <div className="relative z-10 flex max-w-md flex-col items-center text-center text-slate-700">
+            <p className="text-sm uppercase tracking-[0.4em] text-slate-500">The Wedding Of</p>
+            <div className="mt-8 flex h-32 w-32 items-center justify-center rounded-full bg-white/70 text-4xl font-semibold text-slate-600 shadow-[0_10px_40px_rgba(15,23,42,0.15)] ring-1 ring-white/70">
+              WR
+            </div>
+            <h1 className="mt-10 text-4xl font-serif text-slate-700 sm:text-5xl">Wahyu &amp; Riski</h1>
+            <button
+              type="button"
+              onClick={() => setHasOpenedInvitation(true)}
+              className="mt-10 inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-medium text-slate-700 shadow-[0_12px_30px_rgba(15,23,42,0.15)] transition hover:bg-slate-100"
+            >
+              Open Invitation
+            </button>
+          </div>
+        </section>
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-screen bg-black text-white">
