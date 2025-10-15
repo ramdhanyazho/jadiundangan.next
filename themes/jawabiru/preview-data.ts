@@ -1,6 +1,6 @@
 const preview = {
   invitation: {
-    slug: 'contoh-jawabiru',
+    slug: 'jawabiru-split',
     title: 'The Wedding of Wahyu & Riski',
     groom_name: 'Wahyu',
     bride_name: 'Riski',
@@ -13,7 +13,7 @@ const preview = {
       type: 'akad',
       title: 'Akad Nikah',
       date_display: 'Rabu, 15 Mar 2023 • 09.00',
-      location: 'Masjid Agung Jakarta',
+      location: 'Masjid Agung Al Azhar, Jakarta',
     },
     {
       type: 'resepsi',
