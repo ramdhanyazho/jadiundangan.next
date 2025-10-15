@@ -1,6 +1,5 @@
+import { Suspense, type ComponentType } from "react";
 import { notFound } from "next/navigation";
-
-import type { ComponentType } from "react";
 
 import TemplateButtons from "@/components/demo/TemplateButtons";
 import UlemsEmerald from "@/components/themes/ulems-classic-emerald/Demo";
@@ -33,17 +32,27 @@ export default function Page({ params }: { params: { slug: string } }) {
   return (
     <>
       <Theme />
-      <TemplateButtons
-        items={templates}
-        defaults={{
-          title: defaultTitle,
-          names: "Wahyu & Riski",
-          date: "2026-06-21 09:00",
-          venue: "Jakarta",
-        }}
-        sourceSlug={params.slug}
-      />
+      <Suspense fallback={<TemplateButtonsFallback />}>
+        <TemplateButtons
+          items={templates}
+          defaults={{
+            title: defaultTitle,
+            names: "Wahyu & Riski",
+            date: "2026-06-21 09:00",
+            venue: "Jakarta",
+          }}
+          sourceSlug={params.slug}
+        />
+      </Suspense>
     </>
+  );
+}
+
+function TemplateButtonsFallback() {
+  return (
+    <aside className="mx-auto max-w-4xl px-6 pb-12 text-center text-slate-600">
+      Memuat pilihan template…
+    </aside>
   );
 }
 
