@@ -1,21 +1,21 @@
 const config = {
   slug: 'jawabiru',
-  name: 'Jawabiru Elegan',
+  name: 'Jawabiru Split',
   fonts: {
     google: [
-      { family: 'Playfair Display', weights: ['400', '600'] },
-      { family: 'Nunito', weights: ['400', '500', '600'] },
+      { family: 'Josefin Sans', weights: ['400', '500', '600'] },
+      { family: 'Great Vibes', weights: ['400'] },
     ],
   },
   palette: {
-    primary: '#1e3a8a',
-    secondary: '#2563eb',
-    accent: '#f59e0b',
-    bg: '#f8fafc',
-    text: '#0f172a',
+    primary: '#0f172a',
+    secondary: '#1d4ed8',
+    accent: '#38bdf8',
+    bg: '#020617',
+    text: '#e2e8f0',
   },
-  ornaments: { top: 'batik', bottom: 'batik' },
-  sections: ['Cover', 'Event', 'Couple', 'Story', 'Gallery', 'Wishes', 'Gift', 'Footer'],
+  ornaments: { top: 'wave', bottom: 'wave' },
+  sections: ['Cover', 'Couple', 'Event', 'Story', 'Gallery', 'Wishes', 'Gift', 'Footer'],
 };
 
 export default config;
