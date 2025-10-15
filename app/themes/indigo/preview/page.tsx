@@ -57,9 +57,10 @@ const galleryImages = [
 
 export default function Page() {
   return (
-    <main className="relative min-h-screen bg-[#f5f4ff] text-slate-800">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(99,102,241,0.16),transparent_55%)]" />
-      <div className="relative">
+    <main className="flex min-h-screen items-start justify-center bg-neutral-900 px-4 py-10 text-slate-800">
+      <div className="relative flex w-full max-w-[430px] flex-col overflow-hidden rounded-[40px] border border-white/10 bg-[#f5f4ff] shadow-[0_25px_60px_-25px_rgba(15,23,42,0.45)]">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(99,102,241,0.16),transparent_55%)]" />
+        <div className="relative">
         <section
           id="hero"
           className="relative flex min-h-[720px] flex-col items-center justify-center overflow-hidden px-6 pb-24 pt-28 text-center"
@@ -317,8 +318,9 @@ export default function Page() {
           </div>
         </footer>
       </div>
+    </div>
 
-      <aside className="fixed right-8 top-1/2 hidden -translate-y-1/2 flex-col gap-3 rounded-3xl border border-indigo-100 bg-white/80 p-2 shadow-lg backdrop-blur md:flex">
+    <aside className="fixed right-8 top-1/2 hidden -translate-y-1/2 flex-col gap-3 rounded-3xl border border-indigo-100 bg-white/80 p-2 shadow-lg backdrop-blur md:flex">
         {quickLinks.map((link) => (
           <a
             key={link.href}
