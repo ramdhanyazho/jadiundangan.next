@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 
 import { COUPLE_PLACEHOLDER } from "@/lib/assets/placeholders";
 
@@ -22,12 +23,12 @@ export default function Page() {
 
         <h1 className="mt-8 text-4xl font-serif">Wahyu &amp; Riski</h1>
 
-        <a
-          href="#open"
+        <Link
+          href="/demo/ulems-classic-emerald"
           className="mt-6 inline-flex items-center gap-2 rounded-full bg-white px-5 py-2 text-slate-900 shadow-[0_6px_18px_rgba(0,0,0,.08)] ring-1 ring-slate-200 hover:bg-slate-50"
         >
           <span>Open Invitation</span>
-        </a>
+        </Link>
       </section>
     </main>
   );
