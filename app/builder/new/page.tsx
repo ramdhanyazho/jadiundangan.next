@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { Suspense, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 const slugify = (value: string) =>
@@ -12,7 +12,17 @@ const slugify = (value: string) =>
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-|-$)+/g, "");
 
-export default function NewInvitationPage() {
+function LoadingFallback() {
+  return (
+    <main className="mx-auto max-w-3xl px-6 py-10">
+      <div className="rounded-lg border border-slate-200 bg-white p-6 text-center text-slate-600">
+        Memuat formulir…
+      </div>
+    </main>
+  );
+}
+
+function NewInvitationPageContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -128,5 +138,13 @@ export default function NewInvitationPage() {
         </div>
       </form>
     </main>
+  );
+}
+
+export default function NewInvitationPage() {
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <NewInvitationPageContent />
+    </Suspense>
   );
 }
